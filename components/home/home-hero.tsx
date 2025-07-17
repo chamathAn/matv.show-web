@@ -11,11 +11,11 @@ import {
   useDotButton,
 } from "@/components/sliders/EmblaCarouselDotButton";
 import Autoplay from "embla-carousel-autoplay";
-import { Card, CardContent } from "../ui/card";
 import { cn } from "@/lib/utils";
 import { useAnimeRecommendationStore } from "@/Stores/useAnimeRecommendationStore";
 import { useStore } from "zustand";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function HomeHero() {
   // carousel api
@@ -69,7 +69,34 @@ export default function HomeHero() {
     <section className="text-foreground w-full h-fit relative">
       {/* bg */}
       <div className="absolute bg-muted top-0 left-0 w-full h-full">
-        <span className="text-3xl font-semibold">{currentEmblaCard}</span>
+        {filteredAnimes.length > 0 && (
+          <>
+            <Image
+              src={
+                filteredAnimes[
+                  currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
+                ].entry.images.jpg.image_url
+              }
+              alt={
+                filteredAnimes[
+                  currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
+                ].entry.title
+              }
+              fill
+              placeholder="blur"
+              className=" object-cover rounded-md border-2 border-ring"
+              blurDataURL={
+                filteredAnimes[
+                  currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
+                ].entry.images.jpg.image_url
+              }
+            />
+            <div className="bg-background/80 absolute inset-0 w-full h-full backdrop-blur-2xl" />
+          </>
+        )}
+        <span className="text-3xl font-semibold z-20 relative">
+          {currentEmblaCard}
+        </span>
       </div>
 
       {/* content */}
