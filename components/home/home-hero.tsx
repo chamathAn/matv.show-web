@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Carousel,
   type CarouselApi,
@@ -13,6 +13,9 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { Card, CardContent } from "../ui/card";
 import { cn } from "@/lib/utils";
+import { useAnimeRecommendationStore } from "@/Stores/useAnimeRecommendationStore";
+import { useStore } from "zustand";
+import Image from "next/image";
 
 export default function HomeHero() {
   // carousel api
@@ -33,6 +36,35 @@ export default function HomeHero() {
   // handle carousel dots
   const { selectedIndex, scrollSnaps, onDotButtonClick } =
     useDotButton(emblaApi);
+
+  // fetch movie recommendations
+  // const movieRes = useAPI(
+  //   "https://api.themoviedb.org/3/movie/597/recommendations",
+  //   {
+  //     method: "GET",
+  //     headers: {
+  //       accept: "application/json",
+  //       Authorization:
+  //         "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmNjVjNjIyMGYzYWZmMDQxMjFiMmY3ZmQwNzhhZjViOSIsIm5iZiI6MTc1MjY1MzUxOC4yODksInN1YiI6IjY4Nzc1ZWNlODYxN2IzNzI3ZTQzZDNkMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.K-AlBuMwacj8nVaXlphgmVsChqt_s99eR0TO7fBqEOI",
+  //     },
+  //   }
+  // );
+
+  // fetch anime recommendations
+  const animeRecommendation = useStore(
+    useAnimeRecommendationStore,
+    (state) => state.animeRecommendation
+  );
+  useEffect(() => {
+    if (useAnimeRecommendationStore.getState().isAnimeRecommendationFetched)
+      return;
+    useAnimeRecommendationStore.getState().fetchAnimeRecommendation();
+  }, []);
+
+  // fitering the animes
+  const filteredAnimes = useMemo(() => {
+    return [...animeRecommendation.slice(0, 5)];
+  }, [animeRecommendation]);
   return (
     <section className="text-foreground w-full h-fit relative">
       {/* bg */}
@@ -41,7 +73,7 @@ export default function HomeHero() {
       </div>
 
       {/* content */}
-      <div className="flex flex-col gap-2 items-end justify-center min-h-[80vh] z-10 relative">
+      <div className="flex flex-col gap-2 items-end justify-center min-h-screen z-10 relative">
         {/* carousel */}
         <Carousel
           plugins={[
@@ -57,14 +89,17 @@ export default function HomeHero() {
           orientation="vertical"
           className="w-full max-w-xs"
         >
-          <CarouselContent className="-mt-1 h-[200px] p-0.5">
-            {Array.from({ length: 5 }).map((_, index) => (
+          <CarouselContent className="-mt-1 h-[14rem] p-0.5">
+            {filteredAnimes.map((anime, index) => (
               <CarouselItem key={index} className="pt-1">
-                <Card className="h-full">
-                  <CardContent className="flex items-center justify-center h-full">
-                    <span className="text-3xl font-semibold">{index + 1}</span>
-                  </CardContent>
-                </Card>
+                <Image
+                  src={anime.entry.images.jpg.image_url}
+                  alt={anime.entry.title}
+                  width={500}
+                  height={500}
+                  className=" object-cover h-52 rounded-md border-2 border-ring"
+                  blurDataURL={anime.entry.images.jpg.image_url}
+                />
               </CarouselItem>
             ))}
           </CarouselContent>
