@@ -102,3 +102,6 @@ export type AnimeFullDetailsType = {
     url: string;
   }>;
 };
+
+// references
+// types folder structure -> https://stackoverflow.com/questions/62373473/how-to-organize-types-definitions-in-a-react-project-using-typescript
