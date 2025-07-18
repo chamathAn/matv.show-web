@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Carousel,
   type CarouselApi,
@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 import { useAnimeRecommendationStore } from "@/Stores/useAnimeRecommendationStore";
 import { useStore } from "zustand";
 import Image from "next/image";
-import { motion } from "framer-motion";
 
 export default function HomeHero() {
   // carousel api
@@ -53,7 +52,7 @@ export default function HomeHero() {
   // fetch anime recommendations
   const animeRecommendation = useStore(
     useAnimeRecommendationStore,
-    (state) => state.animeRecommendation
+    (state) => state.fullAnimeDetails
   );
   useEffect(() => {
     if (useAnimeRecommendationStore.getState().isAnimeRecommendationFetched)
@@ -61,34 +60,30 @@ export default function HomeHero() {
     useAnimeRecommendationStore.getState().fetchAnimeRecommendation();
   }, []);
 
-  // fitering the animes
-  const filteredAnimes = useMemo(() => {
-    return [...animeRecommendation.slice(0, 5)];
-  }, [animeRecommendation]);
   return (
     <section className="text-foreground w-full h-fit relative">
       {/* bg */}
       <div className="absolute bg-muted top-0 left-0 w-full h-full">
-        {filteredAnimes.length > 0 && (
+        {animeRecommendation.length > 0 && (
           <>
             <Image
               src={
-                filteredAnimes[
+                animeRecommendation[
                   currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
-                ].entry.images.jpg.image_url
+                ].images.jpg.image_url
               }
               alt={
-                filteredAnimes[
+                animeRecommendation[
                   currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
-                ].entry.title
+                ].title
               }
               fill
               placeholder="blur"
               className=" object-cover rounded-md border-2 border-ring"
               blurDataURL={
-                filteredAnimes[
+                animeRecommendation[
                   currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
-                ].entry.images.jpg.image_url
+                ].images.jpg.image_url
               }
             />
             <div className="bg-background/80 absolute inset-0 w-full h-full backdrop-blur-2xl" />
@@ -117,15 +112,15 @@ export default function HomeHero() {
           className="w-full max-w-xs"
         >
           <CarouselContent className="-mt-1 h-[14rem] p-0.5">
-            {filteredAnimes.map((anime, index) => (
+            {animeRecommendation.map((anime, index) => (
               <CarouselItem key={index} className="pt-1">
                 <Image
-                  src={anime.entry.images.jpg.image_url}
-                  alt={anime.entry.title}
+                  src={anime.images.jpg.image_url}
+                  alt={anime.title}
                   width={500}
                   height={500}
                   className=" object-cover h-52 rounded-md border-2 border-ring"
-                  blurDataURL={anime.entry.images.jpg.image_url}
+                  blurDataURL={anime.images.jpg.image_url}
                 />
               </CarouselItem>
             ))}
