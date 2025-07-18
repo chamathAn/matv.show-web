@@ -261,13 +261,9 @@ export default function HomeHero() {
                   <DotButton
                     key={index}
                     onClick={() => onDotButtonClick(index)}
-                    className={cn(
-                      "border-foreground/15 border size-3 rounded-full ",
-                      {
-                        "bg-accent size-3 rounded-full":
-                          index === selectedIndex,
-                      }
-                    )}
+                    className={cn("border-muted border size-3 rounded-full ", {
+                      "bg-accent size-3 rounded-full": index === selectedIndex,
+                    })}
                   />
                 ))}
               </div>
