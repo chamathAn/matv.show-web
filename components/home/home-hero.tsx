@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Carousel,
   type CarouselApi,
@@ -15,8 +15,16 @@ import { cn } from "@/lib/utils";
 import { useAnimeRecommendationStore } from "@/Stores/useAnimeRecommendationStore";
 import { useStore } from "zustand";
 import Image from "next/image";
+import { useMovieRecommendationStore } from "@/Stores/useMovieRecommendationStore";
+import { MovieRecommendationType } from "@/Shared/Types/movie-api.types";
+import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
 
 export default function HomeHero() {
+  // union type for movie, tvshow, and anime
+  type CombinedRecommendationType =
+    | MovieRecommendationType
+    | AnimeFullDetailsType;
+
   // carousel api
   const [emblaApi, setEmblaApi] = useState<CarouselApi>();
   const [currentEmblaCard, setCurrentEmblaCard] = useState(0);
@@ -37,17 +45,15 @@ export default function HomeHero() {
     useDotButton(emblaApi);
 
   // fetch movie recommendations
-  // const movieRes = useAPI(
-  //   "https://api.themoviedb.org/3/movie/597/recommendations",
-  //   {
-  //     method: "GET",
-  //     headers: {
-  //       accept: "application/json",
-  //       Authorization:
-  //         "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmNjVjNjIyMGYzYWZmMDQxMjFiMmY3ZmQwNzhhZjViOSIsIm5iZiI6MTc1MjY1MzUxOC4yODksInN1YiI6IjY4Nzc1ZWNlODYxN2IzNzI3ZTQzZDNkMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.K-AlBuMwacj8nVaXlphgmVsChqt_s99eR0TO7fBqEOI",
-  //     },
-  //   }
-  // );
+  const movieRecommendation = useStore(
+    useMovieRecommendationStore,
+    (state) => state.movieRecommendation
+  );
+  useEffect(() => {
+    if (useMovieRecommendationStore.getState().isMovieRecommendationFetched)
+      return;
+    useMovieRecommendationStore.getState().fetchMovieRecommendation();
+  }, []);
 
   // fetch anime recommendations
   const animeRecommendation = useStore(
@@ -60,31 +66,40 @@ export default function HomeHero() {
     useAnimeRecommendationStore.getState().fetchAnimeRecommendation();
   }, []);
 
+  // combine movies, tvshows, and animes into a single array
+  const combinedRecommendation = useMemo(
+    () => [...movieRecommendation, ...animeRecommendation],
+    [movieRecommendation, animeRecommendation]
+  );
+
+  const getImageUrl = (item: CombinedRecommendationType) => {
+    if ("backdrop_path" in item) {
+      return `https://image.tmdb.org/t/p/original${item.backdrop_path}`; // Movie
+    } else if (item.images?.jpg?.image_url) {
+      return item.images.jpg.image_url; // Anime
+    } else {
+      return "";
+    }
+  };
+
+  // current recommendation
+  const currentRecommendation =
+    combinedRecommendation[
+      currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
+    ];
   return (
     <section className="text-foreground w-full h-fit relative">
       {/* bg */}
       <div className="absolute bg-muted top-0 left-0 w-full h-full">
-        {animeRecommendation.length > 0 && (
+        {currentRecommendation && (
           <>
             <Image
-              src={
-                animeRecommendation[
-                  currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
-                ].images.jpg.image_url
-              }
-              alt={
-                animeRecommendation[
-                  currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
-                ].title
-              }
+              src={getImageUrl(currentRecommendation)}
+              alt={currentRecommendation.title}
               fill
               placeholder="blur"
-              className=" object-cover rounded-md border-2 border-ring"
-              blurDataURL={
-                animeRecommendation[
-                  currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
-                ].images.jpg.image_url
-              }
+              className="object-cover"
+              blurDataURL={getImageUrl(currentRecommendation)}
             />
             <div className="bg-background/80 absolute inset-0 w-full h-full backdrop-blur-2xl" />
           </>
@@ -112,15 +127,15 @@ export default function HomeHero() {
           className="w-full max-w-xs"
         >
           <CarouselContent className="-mt-1 h-[14rem] p-0.5">
-            {animeRecommendation.map((anime, index) => (
+            {combinedRecommendation.map((rec, index) => (
               <CarouselItem key={index} className="pt-1">
                 <Image
-                  src={anime.images.jpg.image_url}
-                  alt={anime.title}
+                  src={getImageUrl(rec)}
+                  alt={rec.title || ""}
                   width={500}
                   height={500}
-                  className=" object-cover h-52 rounded-md border-2 border-ring"
-                  blurDataURL={anime.images.jpg.image_url}
+                  className="object-cover h-52 rounded-md border-2 border-ring"
+                  blurDataURL={getImageUrl(rec)}
                 />
               </CarouselItem>
             ))}
