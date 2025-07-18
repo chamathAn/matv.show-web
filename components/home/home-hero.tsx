@@ -18,12 +18,15 @@ import Image from "next/image";
 import { useMovieRecommendationStore } from "@/Stores/useMovieRecommendationStore";
 import { MovieRecommendationType } from "@/Shared/Types/movie-api.types";
 import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
+import { useTvshowRecommendationStore } from "@/Stores/useTvshowsRecommendationStore";
+import { TvshowRecommendationType } from "@/Shared/Types/tvshows-api.types";
 
 export default function HomeHero() {
   // union type for movie, tvshow, and anime
   type CombinedRecommendationType =
     | MovieRecommendationType
-    | AnimeFullDetailsType;
+    | AnimeFullDetailsType
+    | TvshowRecommendationType;
 
   // carousel api
   const [emblaApi, setEmblaApi] = useState<CarouselApi>();
@@ -43,6 +46,17 @@ export default function HomeHero() {
   // handle carousel dots
   const { selectedIndex, scrollSnaps, onDotButtonClick } =
     useDotButton(emblaApi);
+
+  // fetch tv show recommendations
+  const tvshowRecommendation = useStore(
+    useTvshowRecommendationStore,
+    (state) => state.tvshowRecommendation
+  );
+  useEffect(() => {
+    if (useTvshowRecommendationStore.getState().isTvshowRecommendationFetched)
+      return;
+    useTvshowRecommendationStore.getState().fetchTvshowRecommendation();
+  }, []);
 
   // fetch movie recommendations
   const movieRecommendation = useStore(
@@ -67,9 +81,13 @@ export default function HomeHero() {
   }, []);
 
   // combine movies, tvshows, and animes into a single array
-  const combinedRecommendation = useMemo(
-    () => [...movieRecommendation, ...animeRecommendation],
-    [movieRecommendation, animeRecommendation]
+  const combinedRecommendation: CombinedRecommendationType[] = useMemo(
+    () => [
+      ...movieRecommendation,
+      ...animeRecommendation,
+      ...tvshowRecommendation,
+    ],
+    [movieRecommendation, animeRecommendation, tvshowRecommendation]
   );
 
   const getImageUrl = (item: CombinedRecommendationType) => {
@@ -83,7 +101,7 @@ export default function HomeHero() {
   };
 
   // current recommendation
-  const currentRecommendation =
+  const currentRecommendation: CombinedRecommendationType =
     combinedRecommendation[
       currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
     ];
@@ -95,7 +113,15 @@ export default function HomeHero() {
           <>
             <Image
               src={getImageUrl(currentRecommendation)}
-              alt={currentRecommendation.title}
+              alt={
+                (
+                  currentRecommendation as
+                    | MovieRecommendationType
+                    | AnimeFullDetailsType
+                ).title ||
+                (currentRecommendation as TvshowRecommendationType).name ||
+                ""
+              }
               fill
               placeholder="blur"
               className="object-cover"
@@ -131,7 +157,12 @@ export default function HomeHero() {
               <CarouselItem key={index} className="pt-1">
                 <Image
                   src={getImageUrl(rec)}
-                  alt={rec.title || ""}
+                  alt={
+                    (rec as MovieRecommendationType | AnimeFullDetailsType)
+                      .title ||
+                    (rec as TvshowRecommendationType).name ||
+                    ""
+                  }
                   width={500}
                   height={500}
                   className="object-cover h-52 rounded-md border-2 border-ring"
