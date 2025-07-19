@@ -21,7 +21,6 @@ export const useRecentlyWatchedTvshowsStore =
               "Bearer " + process.env.NEXT_PUBLIC_TMDB_ACCESS_TOKEN,
           },
         });
-        console.log("API Response:", res.data);
         set((state) => ({
           recentlyWatchedTvshows: [...state.recentlyWatchedTvshows, res.data],
           isRecentlyWatchedTvshowsFetched: true,

@@ -11,8 +11,12 @@ import Image from "next/image";
 import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
 import { useRecentlyWatchedTvshowsStore } from "@/Stores/Home/useRecentlyWatchedTvshowsStore";
 import clsx from "clsx";
+import { useRecentlyWatchedAnimesStore } from "@/Stores/Home/useRecentlyWatchedAnimeStore";
+import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
 
 export default function HomeRecentWatch() {
+  // ! checkout the useRecentlyWatchedAnimesStore to see how to fetch recently watched animes/ movies/tv shows's id from backend
+
   const [chosenMediaType, setChosenMediaType] = useState<
     "movies" | "tvshows" | "animes"
   >("movies"); // tv shows, movies, animes filter
@@ -41,18 +45,40 @@ export default function HomeRecentWatch() {
     useRecentlyWatchedMoviesStore.getState().fetchRecentlyWatchedMovies();
   }, []);
 
+  // fetch recently watched animes
+  const recentlyWatchedAnimes: AnimeFullDetailsType[] = useStore(
+    useRecentlyWatchedAnimesStore,
+    (state) => state.recentlyWatchedAnimes
+  );
+  useEffect(() => {
+    if (useRecentlyWatchedAnimesStore.getState().isRecentlyWatchedAnimesFetched)
+      return;
+    useRecentlyWatchedAnimesStore.getState().fetchRecentlyWatchedAnimes();
+  }, []);
+
   // combine tv shows, movies and animes
   const combinedRecentlyWatchedObj = useMemo(() => {
     return {
       tvshows: [...recenltyWatchedTvShows],
       movies: [...recenltyWatchedMovies],
-      animes: [],
+      animes: [...recentlyWatchedAnimes],
     };
-  }, [recenltyWatchedTvShows, recenltyWatchedMovies]);
+  }, [recenltyWatchedTvShows, recenltyWatchedMovies, recentlyWatchedAnimes]);
 
   // dynamic list of recently watched
   const currentList = combinedRecentlyWatchedObj[chosenMediaType] || [];
 
+  const getImageUrl = (
+    item: AnimeFullDetailsType | OneMovieDetailsType | OneTvshowDetailsType
+  ) => {
+    if ("backdrop_path" in item) {
+      return `https://image.tmdb.org/t/p/original${item.backdrop_path}`; // Movie
+    } else if (item.images?.jpg?.image_url) {
+      return item.images.jpg.image_url; // Anime
+    } else {
+      return "";
+    }
+  };
   return (
     <section className="w-full px-6 pt-10 space-y-5 text-foreground h-fit sm:px-0">
       {/* recently watched titles, and filters */}
@@ -110,22 +136,36 @@ export default function HomeRecentWatch() {
             currentList.map((x, i) => (
               <Card
                 key={i}
-                className="py-0 bg-transparent border-0 rounded-md size-fit"
+                className="w-32 py-0 bg-transparent border-0 rounded-md sm:w-40 "
               >
-                <CardContent className="w-32 px-0 sm:w-40 h-44 sm:h-60">
+                <CardContent className="px-0 h-44 sm:h-60">
                   <Image
                     className="object-cover w-full h-full rounded-md "
-                    src={`https://image.tmdb.org/t/p/original${x.backdrop_path}`}
-                    alt={"title" in x ? x.title : "name" in x ? x.name : ""}
+                    src={getImageUrl(x)}
+                    alt={
+                      "title" in x
+                        ? x.title
+                        : "name" in x
+                        ? x.name
+                        : "title" in x
+                        ? (x as AnimeFullDetailsType).title
+                        : ""
+                    }
                     width={500}
                     height={500}
-                    blurDataURL={`https://image.tmdb.org/t/p/original${x.backdrop_path}`}
+                    blurDataURL={getImageUrl(x)}
                     placeholder="blur"
                   />
                 </CardContent>
                 <CardFooter className="flex items-center justify-center font-medium font-poppins">
-                  <span className="text-xs text-center sm:text-sm">
-                    {"title" in x ? x.title : "name" in x ? x.name : ""}
+                  <span className="text-xs text-center sm:text-sm line-clamp-1">
+                    {"title" in x
+                      ? x.title
+                      : "name" in x
+                      ? x.name
+                      : "title" in x
+                      ? (x as AnimeFullDetailsType).title
+                      : ""}
                   </span>
                 </CardFooter>
               </Card>

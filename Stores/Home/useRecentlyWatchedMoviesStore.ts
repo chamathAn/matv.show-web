@@ -21,7 +21,6 @@ export const useRecentlyWatchedMoviesStore =
               "Bearer " + process.env.NEXT_PUBLIC_TMDB_ACCESS_TOKEN,
           },
         });
-        console.log("API Response:", res.data);
         set((state) => ({
           recentlyWatchedMovies: [...state.recentlyWatchedMovies, res.data],
           isRecentlyWatchedMoviesFetched: true,
