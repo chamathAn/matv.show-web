@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Card, CardContent, CardFooter } from "../ui/card";
@@ -8,8 +8,28 @@ import { useStore } from "zustand";
 import { useRecentlyWatchedMoviesStore } from "@/Stores/Home/useRecentlyWatchedMoviesStore";
 import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
 import Image from "next/image";
+import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
+import { useRecentlyWatchedTvshowsStore } from "@/Stores/Home/useRecentlyWatchedTvshowsStore";
+import clsx from "clsx";
 
 export default function HomeRecentWatch() {
+  const [chosenMediaType, setChosenMediaType] = useState<
+    "movies" | "tvshows" | "animes"
+  >("movies"); // tv shows, movies, animes filter
+
+  // fetch recently watched tv shows
+  const recenltyWatchedTvShows: OneTvshowDetailsType[] = useStore(
+    useRecentlyWatchedTvshowsStore,
+    (state) => state.recentlyWatchedTvshows
+  );
+  useEffect(() => {
+    if (
+      useRecentlyWatchedTvshowsStore.getState().isRecentlyWatchedTvshowsFetched
+    )
+      return;
+    useRecentlyWatchedTvshowsStore.getState().fetchRecentlyWatchedTvshows();
+  }, []);
+
   // fetch recently watched movies
   const recenltyWatchedMovies: OneMovieDetailsType[] = useStore(
     useRecentlyWatchedMoviesStore,
@@ -20,6 +40,18 @@ export default function HomeRecentWatch() {
       return;
     useRecentlyWatchedMoviesStore.getState().fetchRecentlyWatchedMovies();
   }, []);
+
+  // combine tv shows, movies and animes
+  const combinedRecentlyWatchedObj = useMemo(() => {
+    return {
+      tvshows: [...recenltyWatchedTvShows],
+      movies: [...recenltyWatchedMovies],
+      animes: [],
+    };
+  }, [recenltyWatchedTvShows, recenltyWatchedMovies]);
+
+  // dynamic list of recently watched
+  const currentList = combinedRecentlyWatchedObj[chosenMediaType] || [];
 
   return (
     <section className="w-full px-6 pt-10 space-y-5 text-foreground h-fit sm:px-0">
@@ -38,16 +70,34 @@ export default function HomeRecentWatch() {
         </div>
 
         <div className="flex items-center h-6 gap-5 text-xs font-poppins sm:text-sm xl:text-base">
-          <h5 className="font-medium hover:underline hover:cursor-pointer">
+          <h5
+            className={clsx(
+              "font-medium hover:underline hover:cursor-pointer",
+              { underline: chosenMediaType === "movies" }
+            )}
+            onClick={() => setChosenMediaType("movies")}
+          >
             Movie
           </h5>
 
           <Separator orientation="vertical" />
-          <h5 className="font-medium hover:underline hover:cursor-pointer">
+          <h5
+            className={clsx(
+              "font-medium hover:underline hover:cursor-pointer",
+              { underline: chosenMediaType === "tvshows" }
+            )}
+            onClick={() => setChosenMediaType("tvshows")}
+          >
             TV Series
           </h5>
           <Separator orientation="vertical" />
-          <h5 className="font-medium hover:underline hover:cursor-pointer">
+          <h5
+            className={clsx(
+              "font-medium hover:underline hover:cursor-pointer",
+              { underline: chosenMediaType === "animes" }
+            )}
+            onClick={() => setChosenMediaType("animes")}
+          >
             Anime
           </h5>
         </div>
@@ -56,8 +106,8 @@ export default function HomeRecentWatch() {
       {/* recent movies */}
       <ScrollArea className="w-full rounded-md whitespace-nowrap">
         <div className="flex pb-4 space-x-4 h-fit w-max">
-          {recenltyWatchedMovies &&
-            recenltyWatchedMovies.map((movie, i) => (
+          {currentList &&
+            currentList.map((x, i) => (
               <Card
                 key={i}
                 className="py-0 bg-transparent border-0 rounded-md size-fit"
@@ -65,17 +115,17 @@ export default function HomeRecentWatch() {
                 <CardContent className="w-32 px-0 sm:w-40 h-44 sm:h-60">
                   <Image
                     className="object-cover w-full h-full rounded-md "
-                    src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
-                    alt={movie.title}
+                    src={`https://image.tmdb.org/t/p/original${x.backdrop_path}`}
+                    alt={"title" in x ? x.title : "name" in x ? x.name : ""}
                     width={500}
                     height={500}
-                    blurDataURL={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
+                    blurDataURL={`https://image.tmdb.org/t/p/original${x.backdrop_path}`}
                     placeholder="blur"
                   />
                 </CardContent>
                 <CardFooter className="flex items-center justify-center font-medium font-poppins">
                   <span className="text-xs text-center sm:text-sm">
-                    {movie.title}
+                    {"title" in x ? x.title : "name" in x ? x.name : ""}
                   </span>
                 </CardFooter>
               </Card>
