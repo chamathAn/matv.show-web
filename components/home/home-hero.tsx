@@ -12,13 +12,13 @@ import {
 } from "@/components/sliders/EmblaCarouselDotButton";
 import Autoplay from "embla-carousel-autoplay";
 import { cn } from "@/lib/utils";
-import { useAnimeRecommendationStore } from "@/Stores/useAnimeRecommendationStore";
+import { useAnimeRecommendationStore } from "@/Stores/Home/useAnimeRecommendationStore";
 import { useStore } from "zustand";
 import Image from "next/image";
-import { useMovieRecommendationStore } from "@/Stores/useMovieRecommendationStore";
+import { useMovieRecommendationStore } from "@/Stores/Home/useMovieRecommendationStore";
 import { MovieRecommendationType } from "@/Shared/Types/movie-api.types";
 import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
-import { useTvshowRecommendationStore } from "@/Stores/useTvshowsRecommendationStore";
+import { useTvshowRecommendationStore } from "@/Stores/Home/useTvshowsRecommendationStore";
 import { TvshowRecommendationType } from "@/Shared/Types/tvshows-api.types";
 import { useMediaQuery } from "react-responsive";
 import { Button } from "../ui/button";
@@ -111,9 +111,9 @@ export default function HomeHero() {
       currentEmblaCard - 1 === -1 ? 0 : currentEmblaCard - 1
     ];
   return (
-    <section className="text-foreground w-full h-fit relative rounded-b-xl border border-muted overflow-hidden">
+    <section className="relative w-full overflow-hidden border text-foreground h-fit rounded-b-xl border-muted">
       {/* bg */}
-      <div className="absolute bg-muted top-0 left-0 w-full h-full">
+      <div className="absolute top-0 left-0 w-full h-full bg-muted">
         {currentRecommendation && (
           <>
             <Image
@@ -132,7 +132,7 @@ export default function HomeHero() {
               className="object-cover"
               blurDataURL={getImageUrl(currentRecommendation)}
             />
-            <div className="bg-background/80 absolute inset-0 w-full h-full backdrop-blur-2xl" />
+            <div className="absolute inset-0 w-full h-full bg-background/80 backdrop-blur-2xl" />
           </>
         )}
       </div>
@@ -141,20 +141,20 @@ export default function HomeHero() {
       <div className="flex flex-col gap-10 items-center min-h-[600px] z-10 relative pt-10">
         <div className="flex flex-col items-center gap-5">
           {/* title */}
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold font-nebular text-foreground text-nowrap px-6">
+          <h1 className="px-6 text-4xl font-bold sm:text-5xl lg:text-7xl font-nebular text-foreground text-nowrap">
             MATV SHOW
           </h1>
-          <p className="text-muted-foreground text-xs sm:text-sm font-medium  text-center font-poppins max-w-5xl px-6">
+          <p className="max-w-5xl px-6 text-xs font-medium text-center text-muted-foreground sm:text-sm font-poppins">
             {
               "Uncover hand-picked anime, movies and tv shows you'll love. Our smart recommendation engine scans your taste and delivers top picks, no fluff, no ads, just binge-worthy suggestions. Ready to explore?"
             }
           </p>
-          <Button className="font-poppins font-medium">Explore More</Button>
+          <Button className="font-medium font-poppins">Explore More</Button>
         </div>
 
         {/* hero bottom section */}
         <div
-          className="md:bg-background flex-1 w-full flex flex-col items-center md:items-end justify-center gap-2 px-6 py-10"
+          className="flex flex-col items-center justify-center flex-1 w-full gap-2 px-6 py-10 md:bg-background md:items-end"
           style={{
             clipPath: isMdSize
               ? ""
@@ -162,11 +162,11 @@ export default function HomeHero() {
           }}
         >
           {/* recommerndation title,catergory, and rating */}
-          <div className="flex xl:flex-row flex-col-reverse gap-5 md:w-1/2 justify-between">
-            <div className="flex flex-col gap-y-3 justify-start text-foreground font-poppins font-medium text-xs sm:text-sm xl:text-base">
+          <div className="flex flex-col-reverse justify-between gap-5 xl:flex-row md:w-1/2">
+            <div className="flex flex-col justify-start text-xs font-medium gap-y-3 text-foreground font-poppins sm:text-sm xl:text-base">
               {currentRecommendation && (
                 <>
-                  <div className=" flex gap-1">
+                  <div className="flex gap-1 ">
                     <span className="text-nowrap">Name :</span>
                     <h3 className="line-clamp-1">
                       {(
@@ -217,7 +217,7 @@ export default function HomeHero() {
               )}
             </div>
             {/* carousel */}
-            <div className="flex flex-col gap-y-2 items-start xl:items-end">
+            <div className="flex flex-col items-start gap-y-2 xl:items-end">
               <Carousel
                 plugins={[
                   Autoplay({
@@ -248,7 +248,7 @@ export default function HomeHero() {
                         }
                         width={500}
                         height={500}
-                        className="object-cover h-52 rounded-md border-2 border-ring"
+                        className="object-cover border-2 rounded-md h-52 border-ring"
                         blurDataURL={getImageUrl(rec)}
                       />
                     </CarouselItem>
