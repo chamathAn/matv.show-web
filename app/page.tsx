@@ -1,6 +1,7 @@
 import HomeHero from "@/components/home/home-hero";
 import HomePlanToWatch from "@/components/home/home-plan-to-watch";
 import HomeRecentWatch from "@/components/home/home-recent-watch";
+import HomeTrending from "@/components/home/home-trending";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <HomeHero />
       <HomeRecentWatch />
       <HomePlanToWatch />
+      <HomeTrending />
     </main>
   );
 }
