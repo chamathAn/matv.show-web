@@ -8,7 +8,7 @@ export default function SignIn() {
     const handleSignIn = async () => {
         await authClient.signIn.social({
             provider: "google",
-            callbackURL: "http://localhost:3001/",
+            callbackURL: process.env.NEXT_PUBLIC_FRONTEND_URL as string,
         })
     }
   return (
