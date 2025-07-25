@@ -5,13 +5,13 @@ import { Separator } from "../ui/separator";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { useStore } from "zustand";
-import { useTrendingMovies } from "@/Stores/Home/useTrendingMovies";
+import { useTrendingMovies } from "@/Stores/Cache/useTrendingMovies";
 import { TrendingMoviesType } from "@/Shared/Types/movie-api.types";
 import Image from "next/image";
 import { TrendingTvShowsType } from "@/Shared/Types/tvshows-api.types";
-import { useTrendingTvshows } from "@/Stores/Home/useTrendingTvshows";
+import { useTrendingTvshows } from "@/Stores/Cache/useTrendingTvshows";
 import clsx from "clsx";
-import { useTrendingAnimes } from "@/Stores/Home/useTrendingAnime";
+import { useTrendingAnimes } from "@/Stores/Cache/useTrendingAnime";
 import { TrendingAnimeType } from "@/Shared/Types/anime-api.types";
 
 export default function HomeTrending() {

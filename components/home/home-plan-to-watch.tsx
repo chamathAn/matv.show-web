@@ -5,15 +5,15 @@ import { Separator } from "../ui/separator";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { useStore } from "zustand";
-import { usePlanToWatchMoviesStore } from "@/Stores/Home/usePlanToWatchMovieStore";
+import { usePlanToWatchMoviesStore } from "@/Stores/Stale/FilterState/PlanToWatch/usePlanToWatchMovieStore";
 import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
 import Image from "next/image";
 import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
 
 import clsx from "clsx";
-import { usePlanToWatchAnimesStore } from "@/Stores/Home/usePlanToWatchAnimes";
+import { usePlanToWatchAnimesStore } from "@/Stores/Stale/FilterState/PlanToWatch/usePlanToWatchAnimes";
 import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
-import { usePlanToWatchTvshowsStore } from "@/Stores/Home/usePlanToWatchTvshowsStore";
+import { usePlanToWatchTvshowsStore } from "@/Stores/Stale/FilterState/PlanToWatch/usePlanToWatchTvshowsStore";
 
 export default function HomePlanToWatch() {
   const [chosenMediaType, setChosenMediaType] = useState<

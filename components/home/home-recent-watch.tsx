@@ -5,13 +5,13 @@ import { Separator } from "../ui/separator";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { useStore } from "zustand";
-import { useRecentlyWatchedMoviesStore } from "@/Stores/Home/useRecentlyWatchedMoviesStore";
+import { useRecentlyWatchedMoviesStore } from "@/Stores/Stale/RecentlyWatched/useRecentlyWatchedMoviesStore";
 import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
 import Image from "next/image";
 import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
-import { useRecentlyWatchedTvshowsStore } from "@/Stores/Home/useRecentlyWatchedTvshowsStore";
+import { useRecentlyWatchedTvshowsStore } from "@/Stores/Stale/RecentlyWatched/useRecentlyWatchedTvshowsStore";
 import clsx from "clsx";
-import { useRecentlyWatchedAnimesStore } from "@/Stores/Home/useRecentlyWatchedAnimeStore";
+import { useRecentlyWatchedAnimesStore } from "@/Stores/Stale/RecentlyWatched/useRecentlyWatchedAnimeStore";
 import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
 
 export default function HomeRecentWatch() {
