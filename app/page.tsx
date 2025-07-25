@@ -5,7 +5,7 @@ import HomeTrending from "@/components/home/home-trending";
 
 export default function Home() {
   return (
-    <main className="bg-background container mx-auto overflow-clip ">
+    <main className="bg-background pb-[3.5625rem] container mx-auto overflow-clip ">
       <HomeHero />
       <HomeRecentWatch />
       <HomePlanToWatch />
