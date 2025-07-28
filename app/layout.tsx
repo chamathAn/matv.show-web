@@ -4,6 +4,7 @@ import localfont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/header/Header";
 import { Toaster } from "@/components/ui/sonner";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const poppins = Poppins({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -42,7 +43,7 @@ export default function RootLayout({
       >
         <Toaster />
         <Header />
-        {children}
+        <NuqsAdapter>{children}</NuqsAdapter>
       </body>
     </html>
   );

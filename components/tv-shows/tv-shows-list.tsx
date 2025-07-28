@@ -1,38 +1,43 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useStore } from "zustand";
-import { useTrendingTvshows } from "@/Stores/Cache/useTrendingTvshows";
+import React, { useState } from "react";
 import StateFilter from "../filter/state-filter";
 import { Separator } from "../ui/separator";
 import clsx from "clsx";
 import Image from "next/image";
 import { Card, CardContent, CardFooter } from "../ui/card";
-
+import useTrendingMediaData from "@/Hooks/useTrendingMediaData";
+import { FilterStatesType } from "@/Shared/Types/filter-states.types";
+import { useQueryState } from "nuqs";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationLink,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "../ui/pagination";
 export default function TvShowsList() {
-  // ! trending tv shows data from store
-  const trendingTvShows = useStore(
-    useTrendingTvshows,
-    (state) => state.trendingTvshows
-  );
-  const isFetched = useStore(
-    useTrendingTvshows,
-    (state) => state.isTrendingTvshowsFetched
-  );
-  const fetchTrendingTvshows =
-    useTrendingTvshows.getState().fetchTrendingTvshows;
-
-  // ! fetch on first load if not already fetched
-  useEffect(() => {
-    if (!isFetched) {
-      fetchTrendingTvshows();
-    }
-  }, [isFetched, fetchTrendingTvshows]);
-
+  const { trendingTvshows } = useTrendingMediaData(); // trending tv shows
   const [chosenMediaType, setChosenMediaType] = useState<
     "trending" | "new-release" | "aired-this-week" | ""
   >("");
 
+  // user tv show progress state
+  const [chosenState, setChosenState] = useQueryState<FilterStatesType>(
+    "state",
+    { defaultValue: "watching" as FilterStatesType }
+  );
+
+  // pagination settings
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 10;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = trendingTvshows
+    .slice(0, 20)
+    .slice(indexOfFirstItem, indexOfLastItem);
   return (
     <section className="relative mt-10 px-6 sm:px-0 font-poppins w-full flex flex-col gap-y-5 lg:-mt-20 z-20 overflow-hidden text-foreground">
       {/* title */}
@@ -41,7 +46,11 @@ export default function TvShowsList() {
       {/* filters */}
       <div className="flex flex-col gap-1 items-start justify-between w-full h-fit sm:flex-row sm:items-center">
         {/* user tv show progress state */}
-        <StateFilter />
+        <StateFilter
+          onChange={(state: string) =>
+            setChosenState(state as FilterStatesType)
+          }
+        />
 
         {/* general static filters */}
         <div className="flex items-center h-6 gap-5 text-xs sm:text-sm xl:text-base">
@@ -79,7 +88,7 @@ export default function TvShowsList() {
 
       {/* tv show list */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 h-fit w-full">
-        {trendingTvShows.slice(0, 20).map((rec, i) => (
+        {currentItems.map((rec, i) => (
           <Card key={i} className="py-0 bg-transparent border-0 rounded-md">
             <CardContent className="px-0 h-44 sm:h-60">
               <Image
@@ -100,6 +109,85 @@ export default function TvShowsList() {
           </Card>
         ))}
       </div>
+
+      {/* pagination */}
+      <PaginationComponent
+        totalItems={trendingTvshows.slice(0, 20).length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+      />
     </section>
+  );
+}
+
+function PaginationComponent({
+  totalItems,
+  itemsPerPage,
+  currentPage,
+  setCurrentPage,
+}: {
+  totalItems: number;
+  itemsPerPage: number;
+  currentPage: number;
+  setCurrentPage: (currentPage: number) => void;
+}) {
+  const pages = [];
+  for (let i = 1; i <= Math.ceil(totalItems / itemsPerPage); i++) {
+    pages.push(i);
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < pages.length) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    console.log(currentPage);
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  return (
+    <Pagination>
+      <PaginationContent>
+        {currentPage > 1 && (
+          <PaginationItem>
+            <PaginationPrevious
+              href={""}
+              onClick={() => handlePreviousPage()}
+            />
+          </PaginationItem>
+        )}
+
+        {pages.map((page: any) => (
+          <PaginationItem key={page}>
+            <PaginationLink
+              href={""}
+              onClick={() => setCurrentPage(page)}
+              className={
+                page === currentPage ? "border border-border-softBeige" : ""
+              }
+            >
+              {page}
+            </PaginationLink>
+          </PaginationItem>
+        ))}
+        {currentPage === pages.length || pages.length <= 2 ? (
+          <PaginationItem></PaginationItem>
+        ) : (
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+        )}
+
+        {currentPage < pages.length && (
+          <PaginationItem>
+            <PaginationNext href={""} onClick={() => handleNextPage()} />
+          </PaginationItem>
+        )}
+      </PaginationContent>
+    </Pagination>
   );
 }
