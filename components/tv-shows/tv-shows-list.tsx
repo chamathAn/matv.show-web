@@ -32,7 +32,7 @@ export default function TvShowsList() {
 
   // pagination settings
   const [currentPage, setCurrentPage] = React.useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 30;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = trendingTvshows
@@ -161,7 +161,7 @@ function PaginationComponent({
           </PaginationItem>
         )}
 
-        {pages.map((page: any) => (
+        {pages.map((page: number) => (
           <PaginationItem key={page}>
             <PaginationLink
               href={""}
