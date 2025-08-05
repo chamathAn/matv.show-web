@@ -28,23 +28,25 @@ export default function TvContentHero() {
           {/* image */}
           <Image
             src={
-              `https://image.tmdb.org/t/p/original/${OneTvshowDetails.poster_path}` ||
+              `https://image.tmdb.org/t/p/original/${OneTvshowDetails.backdrop_path}` ||
               ""
             }
             alt={OneTvshowDetails.name || ""}
             width={1000}
             height={1000}
-            className="w-full h-full object-cover rounded-md"
+            className="w-auto h-full object-cover rounded-md"
           />
 
           {/* title and descriptions */}
-          <div className="flex flex-col gap-5">
-            <h1 className="text-4xl font-bold">{OneTvshowDetails.name}</h1>
+          <div className="flex flex-col gap-5 py-3">
+            <h1 className="text-lg sm:text-2xl lg:text-4xl font-bold">
+              {OneTvshowDetails.name}
+            </h1>
             <div className="grid grid-cols-3">
               {/* rating */}
               <div className="flex flex-col size-full items-center gap-2">
                 <Star size={25} />
-                <p className="text-sm font-medium">
+                <p className="text-xs sm:text-sm font-medium">
                   {OneTvshowDetails.vote_average + "/10"}
                 </p>
               </div>
@@ -52,7 +54,7 @@ export default function TvContentHero() {
               {/* vote count */}
               <div className="flex flex-col size-full items-center gap-2">
                 <Vote size={25} />
-                <p className="text-sm font-medium">
+                <p className="text-xs sm:text-sm font-medium">
                   {OneTvshowDetails.vote_count + " votes"}
                 </p>
               </div>
@@ -60,22 +62,30 @@ export default function TvContentHero() {
               {/* your rating */}
               <div className="flex flex-col size-full items-center gap-2">
                 <BookHeart size={25} />
-                <p className="text-sm font-medium">
+                <p className="text-xs sm:text-sm font-medium">
                   {userRating + " Your rating"}
                 </p>
               </div>
             </div>
 
             {/* overview */}
-            <p>{OneTvshowDetails.overview}</p>
+            <p className="text-sm sm:text-base">{OneTvshowDetails.overview}</p>
 
             {/* give your rating */}
-            <div className="flex justify-between items-center">
+            <div className="flex gap-5 items-center">
               <Rating
                 value={userRating}
                 onChange={(_, data) => setUserRating(data.value)}
               />
-              <Button variant="outline">Rate</Button>
+              <Button variant="secondary">Rate</Button>
+            </div>
+
+            {/* genres */}
+            <div className="flex flex-wrap gap-2 text-sm">
+              {OneTvshowDetails.genres &&
+                OneTvshowDetails.genres.map((genre) => (
+                  <p key={genre.id}>{genre.name}</p>
+                ))}
             </div>
           </div>
         </>

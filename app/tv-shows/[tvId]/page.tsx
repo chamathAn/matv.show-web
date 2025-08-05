@@ -1,5 +1,6 @@
 "use client";
 import TvContentHero from "@/components/tv-shows/content/tv-content-hero";
+import TvSeasonsEpisodes from "@/components/tv-shows/content/tv-seasons-episodes";
 import { useOneTvshowDetailsStore } from "@/Stores/Stale/Content/useOneTvshowDetailStore";
 import { useParams } from "next/navigation";
 import React from "react";
@@ -12,6 +13,7 @@ export default function Page() {
   return (
     <main className="bg-background pb-[3.5625rem] container mx-auto overflow-clip ">
       <TvContentHero />
+      <TvSeasonsEpisodes />
     </main>
   );
 }
