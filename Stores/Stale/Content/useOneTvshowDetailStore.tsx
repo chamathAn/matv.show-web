@@ -1,4 +1,7 @@
-import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
+import {
+  OneTvshowDetailsType,
+  TvshowSeasonDetailsTypes,
+} from "@/Shared/Types/tvshows-api.types";
 import axios from "axios";
 import { createStore } from "zustand";
 
@@ -7,6 +10,7 @@ type OneTvshowDetails = {
   tvId: string;
   oneTvshowdetails: OneTvshowDetailsType;
   isOneTvshowDetialsFetched: boolean;
+  allSeasons: TvshowSeasonDetailsTypes[];
   fetchOneTvshowDetails: () => Promise<void>;
 };
 
@@ -15,6 +19,7 @@ export const useOneTvshowDetailsStore = createStore<OneTvshowDetails>(
     loading: false,
     tvId: "",
     oneTvshowdetails: Object.create(null),
+    allSeasons: [],
     isOneTvshowDetialsFetched: false,
     fetchOneTvshowDetails: async () => {
       try {
@@ -31,6 +36,25 @@ export const useOneTvshowDetailsStore = createStore<OneTvshowDetails>(
             },
           }
         );
+
+        // fetching all details about seasons
+        for (let i = 0; i < res.data.number_of_seasons; i++) {
+          const seasonRes = await axios.get(
+            ` https://api.themoviedb.org/3/tv/${
+              useOneTvshowDetailsStore.getState().tvId
+            }/season/${i + 1}`,
+            {
+              headers: {
+                accept: "application/json",
+                Authorization:
+                  "Bearer " + process.env.NEXT_PUBLIC_TMDB_ACCESS_TOKEN,
+              },
+            }
+          );
+          useOneTvshowDetailsStore.getState().allSeasons.push(seasonRes.data);
+        }
+
+        //  setting the all the details
         set({
           oneTvshowdetails: res.data,
           isOneTvshowDetialsFetched: true,

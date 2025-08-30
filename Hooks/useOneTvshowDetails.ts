@@ -14,5 +14,6 @@ export default function useOneTvshowDetails() {
   return {
     OneTvshowDetails: tvState.oneTvshowdetails,
     isLoading: tvState.loading,
+    allSeasons: tvState.allSeasons,
   };
 }

@@ -117,3 +117,61 @@ export type TrendingTvShowsType = {
   vote_count: number;
   origin_country: string[];
 };
+
+// ! tv shows seasons and episodes types
+type TvShowEpisodeCrewMember = {
+  department: string;
+  job: string;
+  credit_id: string;
+  adult: boolean; // default: true
+  gender: number; // default: 0
+  id: number; // default: 0
+  known_for_department: string;
+  name: string;
+  original_name: string;
+  popularity: number; // default: 0
+  profile_path: string;
+};
+
+type TvShowEpisodeGuestStar = {
+  character: string;
+  credit_id: string;
+  order: number; // default: 0
+  adult: boolean; // default: true
+  gender: number; // default: 0
+  id: number; // default: 0
+  known_for_department: string;
+  name: string;
+  original_name: string;
+  popularity: number; // default: 0
+  profile_path: string;
+};
+
+export type TvShowEpisodeType = {
+  air_date: string;
+  episode_number: number; // default: 0
+  id: number; // default: 0
+  name: string;
+  overview: string;
+  production_code: string;
+  runtime: number; // default: 0
+  season_number: number; // default: 0
+  show_id: number; // default: 0
+  still_path: string;
+  vote_average: number; // default: 0
+  vote_count: number; // default: 0
+  crew: TvShowEpisodeCrewMember[];
+  guest_stars: TvShowEpisodeGuestStar[];
+};
+
+export type TvshowSeasonDetailsTypes = {
+  _id: string;
+  air_date: string;
+  episodes: TvShowEpisodeType[];
+  name: string;
+  overview: string;
+  id: number; // default: 0
+  poster_path: string;
+  season_number: number; // default: 0
+  vote_average: number; // default: 0
+};
