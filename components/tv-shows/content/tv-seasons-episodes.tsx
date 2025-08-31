@@ -7,20 +7,23 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Rating } from "@fluentui/react-rating";
-import { Button } from "@/components/ui/button";
+import StateFilter from "@/components/filter/state-filter";
+import { FilterStatesType } from "@/Shared/Types/filter-states.types";
 export default function TvSeasonsEpisodes() {
   const { allSeasons } = useOneTvshowDetails();
-  const [userRating, setUserRating] = useState<{ [key: string]: number }>({});
+  const [episodeStates, setEpisodeStates] = useState<{
+    [key: string]: FilterStatesType | "";
+  }>({});
 
-  // handle rating
-  const handleRatingChange = (episodeName: string, value: number) => {
-    setUserRating((prevRatings) => ({
-      ...prevRatings,
-      [episodeName]: value,
+  // handle user tv show progress state
+  const handleStateChange = (episodeName: string, state: FilterStatesType) => {
+    setEpisodeStates((prevStates) => ({
+      ...prevStates,
+      [episodeName]: state,
     }));
   };
 
+  console.log(episodeStates);
   return (
     <section className="relative mt-10 px-6 sm:px-0 font-poppins w-full flex flex-col gap-y-5 z-20 overflow-hidden text-foreground">
       {/* accordion */}
@@ -40,15 +43,16 @@ export default function TvSeasonsEpisodes() {
                       <AccordionContent>
                         <p>{episode.overview}</p>
 
-                        {/* give your rating */}
-                        <div className="flex gap-5 items-center mt-5">
-                          <Rating
-                            value={userRating[episode.name] || 0}
-                            onChange={(_, data) =>
-                              handleRatingChange(episode.name, data.value)
+                        {/* user tv show progress state */}
+                        <div className="mt-4">
+                          <StateFilter
+                            onChange={(state: string) =>
+                              handleStateChange(
+                                episode.name,
+                                state as FilterStatesType
+                              )
                             }
                           />
-                          <Button variant="secondary">Rate</Button>
                         </div>
                       </AccordionContent>
                     </AccordionItem>
