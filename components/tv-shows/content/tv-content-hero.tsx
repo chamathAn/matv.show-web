@@ -1,8 +1,10 @@
 "use client";
 
+import StateFilter from "@/components/filter/state-filter";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import useOneTvshowDetails from "@/Hooks/useOneTvshowDetails";
+import { FilterStatesType } from "@/Shared/Types/filter-states.types";
 import { Rating } from "@fluentui/react-rating";
 import { BookHeart, Star, Vote } from "lucide-react";
 import Image from "next/image";
@@ -13,6 +15,10 @@ export default function TvContentHero() {
 
   // user rating manage
   const [userRating, setUserRating] = useState(0);
+
+  // progress state
+  const [progressState, setProgressState] = useState<FilterStatesType | "">("");
+  console.log(progressState);
   return (
     <section className="relative w-full  gap-5 sm:grid grid-cols-[1fr_2fr] overflow-hidden text-foreground font-poppins px-6 sm:px-0">
       {isLoading ? (
@@ -72,14 +78,23 @@ export default function TvContentHero() {
             <p className="text-sm sm:text-base">{OneTvshowDetails.overview}</p>
 
             {/* give your rating */}
-            <div className="flex gap-5 items-center">
-              <Rating
-                value={userRating}
-                onChange={(_, data) => setUserRating(data.value)}
-              />
-              <Button variant="secondary">Rate</Button>
+            <div className="flex flex-col sm:flex-row gap-5 justify-between">
+              <div className="flex gap-5 items-center">
+                <Rating
+                  value={userRating}
+                  onChange={(_, data) => setUserRating(data.value)}
+                />
+                <Button variant="secondary">Rate</Button>
+              </div>
+              {/* user tv show progress state */}
+              <div className="flex justify-start">
+                <StateFilter
+                  onChange={(state: string) =>
+                    setProgressState(state as FilterStatesType)
+                  }
+                />
+              </div>
             </div>
-
             {/* genres */}
             <div className="flex flex-wrap gap-2 text-sm">
               {OneTvshowDetails.genres &&

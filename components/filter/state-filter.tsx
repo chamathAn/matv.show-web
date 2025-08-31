@@ -40,7 +40,7 @@ export default function StateFilter({
       </PopoverTrigger>
 
       {/* Popeover content */}
-      <PopoverContent className="w-80 border bg-background rounded-md">
+      <PopoverContent className="w-80 border bg-background rounded-md z-50">
         <Command className="p-4 bg-background">
           <CommandInput placeholder="Search for the state..." />
           <CommandList>

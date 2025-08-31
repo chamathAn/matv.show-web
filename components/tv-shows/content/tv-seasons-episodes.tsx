@@ -23,7 +23,6 @@ export default function TvSeasonsEpisodes() {
     }));
   };
 
-  console.log(episodeStates);
   return (
     <section className="relative mt-10 px-6 sm:px-0 font-poppins w-full flex flex-col gap-y-5 z-20 overflow-hidden text-foreground">
       {/* accordion */}
