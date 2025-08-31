@@ -5,6 +5,7 @@ import { useStore } from "zustand";
 
 export default function useOneTvshowDetails() {
   const tvState = useStore(useOneTvshowDetailsStore);
+
   useEffect(() => {
     if (!tvState.isOneTvshowDetialsFetched) {
       useOneTvshowDetailsStore.getState().fetchOneTvshowDetails();
