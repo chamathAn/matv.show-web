@@ -9,8 +9,12 @@ import {
 } from "@/components/ui/accordion";
 import StateFilter from "@/components/filter/state-filter";
 import { FilterStatesType } from "@/Shared/Types/filter-states.types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useOneTvshowDetailsStore } from "@/Stores/Stale/Content/useOneTvshowDetailStore";
+import { useStore } from "zustand";
 export default function TvSeasonsEpisodes() {
-  const { allSeasons } = useOneTvshowDetails();
+  // useOneTvshowDetailsStore.setState({ isOneTvshowDetialsFetched: false });
+  const { loading, allSeasons } = useStore(useOneTvshowDetailsStore);
   const [episodeStates, setEpisodeStates] = useState<{
     [key: string]: FilterStatesType | "";
   }>({});
@@ -26,7 +30,12 @@ export default function TvSeasonsEpisodes() {
   return (
     <section className="relative mt-10 px-6 sm:px-0 font-poppins w-full flex flex-col gap-y-5 z-20 overflow-hidden text-foreground">
       {/* accordion */}
-      {allSeasons &&
+      {loading ? (
+        <div className="flex flex-col gap-5">
+          <Skeleton className="h-10 w-full rounded-md" />
+          <Skeleton className="h-10 w-full rounded-md" />
+        </div>
+      ) : (
         allSeasons.map((season, i) => (
           <Accordion key={i} type="single" collapsible>
             <AccordionItem value={season.name}>
@@ -60,7 +69,8 @@ export default function TvSeasonsEpisodes() {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        ))}
+        ))
+      )}
     </section>
   );
 }

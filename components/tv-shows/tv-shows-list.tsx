@@ -18,6 +18,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../ui/pagination";
+import Link from "next/link";
 export default function TvShowsList() {
   const { trendingTvshows } = useTrendingMediaData(); // trending tv shows
   const [chosenMediaType, setChosenMediaType] = useState<
@@ -89,24 +90,26 @@ export default function TvShowsList() {
       {/* tv show list */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 h-fit w-full">
         {currentItems.map((rec, i) => (
-          <Card key={i} className="py-0 bg-transparent border-0 rounded-md">
-            <CardContent className="px-0 h-44 sm:h-60">
-              <Image
-                className="object-cover w-full h-full rounded-md"
-                src={`https://image.tmdb.org/t/p/original${rec.backdrop_path}`}
-                alt={rec.name || ""}
-                width={500}
-                height={500}
-                blurDataURL={`https://image.tmdb.org/t/p/original${rec.backdrop_path}`}
-                placeholder="blur"
-              />
-            </CardContent>
-            <CardFooter className="flex items-center justify-center font-medium font-poppins">
-              <span className="text-xs text-center sm:text-sm line-clamp-1">
-                {rec.name || ""}
-              </span>
-            </CardFooter>
-          </Card>
+          <Link key={i} href={`/tv-shows/${rec.id}`}>
+            <Card className="py-0 bg-transparent border-0 rounded-md">
+              <CardContent className="px-0 h-44 sm:h-60">
+                <Image
+                  className="object-cover w-full h-full rounded-md"
+                  src={`https://image.tmdb.org/t/p/original${rec.backdrop_path}`}
+                  alt={rec.name || ""}
+                  width={500}
+                  height={500}
+                  blurDataURL={`https://image.tmdb.org/t/p/original${rec.backdrop_path}`}
+                  placeholder="blur"
+                />
+              </CardContent>
+              <CardFooter className="flex items-center justify-center font-medium font-poppins">
+                <span className="text-xs text-center sm:text-sm line-clamp-1">
+                  {rec.name || ""}
+                </span>
+              </CardFooter>
+            </Card>
+          </Link>
         ))}
       </div>
 
