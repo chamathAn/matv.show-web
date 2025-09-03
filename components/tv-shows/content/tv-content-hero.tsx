@@ -1,16 +1,18 @@
 "use client";
 
 import StateFilter from "@/components/filter/state-filter";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import useOneTvshowDetails from "@/Hooks/useOneTvshowDetails";
+import { authClient } from "@/lib/auth-client";
 import { FilterStatesType } from "@/Shared/Types/filter-states.types";
 import { Rating } from "@fluentui/react-rating";
+import axios from "axios";
 import { BookHeart, Star, Vote } from "lucide-react";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function TvContentHero() {
+  const { data: session } = authClient.useSession(); // access the session data
   const { OneTvshowDetails, isLoading } = useOneTvshowDetails();
 
   // user rating manage
@@ -18,7 +20,28 @@ export default function TvContentHero() {
 
   // progress state
   const [progressState, setProgressState] = useState<FilterStatesType | "">("");
-  console.log(progressState);
+
+  // handle user tv show progress and rating state with backend
+  useEffect(() => {
+    if (session && OneTvshowDetails) {
+      async function handleTvShowDataChange() {
+        const response = await axios.post(
+          process.env.NEXT_PUBLIC_BACKEND_URL + "/api/v1/tv-shows/",
+          {
+            tvShowId: OneTvshowDetails.id.toString(),
+            userId: session?.user.id,
+            tvShowRating: userRating,
+            tvShowStates: progressState,
+          },
+          {
+            withCredentials: true,
+          }
+        );
+        console.log(response.data);
+      }
+      handleTvShowDataChange();
+    }
+  }, [progressState, userRating]);
   return (
     <section className="relative w-full  gap-5 sm:grid grid-cols-[1fr_2fr] overflow-hidden text-foreground font-poppins px-6 sm:px-0">
       {isLoading ? (
@@ -79,13 +102,11 @@ export default function TvContentHero() {
 
             {/* give your rating */}
             <div className="flex flex-col sm:flex-row gap-5 justify-between">
-              <div className="flex gap-5 items-center">
-                <Rating
-                  value={userRating}
-                  onChange={(_, data) => setUserRating(data.value)}
-                />
-                <Button variant="secondary">Rate</Button>
-              </div>
+              <Rating
+                value={userRating}
+                onChange={(_, data) => setUserRating(data.value)}
+              />
+
               {/* user tv show progress state */}
               <div className="flex justify-start">
                 <StateFilter
