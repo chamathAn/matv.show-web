@@ -3,45 +3,88 @@
 import StateFilter from "@/components/filter/state-filter";
 import { Skeleton } from "@/components/ui/skeleton";
 import useOneTvshowDetails from "@/Hooks/useOneTvshowDetails";
+import useUserAllTvShows from "@/Hooks/useUserAllTvShows";
 import { authClient } from "@/lib/auth-client";
 import { FilterStatesType } from "@/Shared/Types/filter-states.types";
+import { useUserAllTvShowsStore } from "@/Stores/Stale/UserAll/useUserAllMATStore";
 import { Rating } from "@fluentui/react-rating";
 import axios from "axios";
 import { BookHeart, Star, Vote } from "lucide-react";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 
 export default function TvContentHero() {
-  const { data: session } = authClient.useSession(); // access the session data
+  const { data: session } = authClient.useSession();
   const { OneTvshowDetails, isLoading } = useOneTvshowDetails();
 
-  // user rating manage
-  const [userRating, setUserRating] = useState(0);
+  // user all tv shows
+  const { userAllTvShows } = useUserAllTvShows();
 
+  // rating
+  const [userRating, setUserRating] = useState(0);
   // progress state
   const [progressState, setProgressState] = useState<FilterStatesType | "">("");
 
-  // handle user tv show progress and rating state with backend
+  // This does NOT send anything to the backend; it only sets the UI.
   useEffect(() => {
-    if (session && OneTvshowDetails) {
-      async function handleTvShowDataChange() {
-        const response = await axios.post(
-          process.env.NEXT_PUBLIC_BACKEND_URL + "/api/v1/tv-shows/",
-          {
-            tvShowId: OneTvshowDetails.id.toString(),
-            userId: session?.user.id,
-            tvShowRating: userRating,
-            tvShowStates: progressState,
-          },
-          {
-            withCredentials: true,
-          }
-        );
-        console.log(response.data);
-      }
-      handleTvShowDataChange();
+    if (!session || !OneTvshowDetails || !userAllTvShows) return;
+
+    // check if the tv show is in the user's list
+    const isMatched = userAllTvShows.find(
+      (tvShow) => tvShow.tvShowId === OneTvshowDetails.id.toString()
+    );
+
+    // setting the rating and progress state
+    if (isMatched) {
+      setUserRating(isMatched.tvShowRating);
+      setProgressState(isMatched.tvShowStates as FilterStatesType);
     }
-  }, [progressState, userRating]);
+  }, [session, OneTvshowDetails, userAllTvShows]);
+
+  // send update to backend (optimistic UI already applied by callers)
+  const sendTvShowUpdate = async ({
+    tvShowRating,
+    tvShowStates,
+  }: {
+    tvShowRating?: number;
+    tvShowStates?: FilterStatesType | "";
+  }) => {
+    if (!session || !OneTvshowDetails) return;
+
+    const payload = {
+      tvShowId: OneTvshowDetails.id.toString(),
+      userId: session?.user.id,
+      tvShowRating: tvShowRating ?? userRating,
+      tvShowStates: tvShowStates ?? progressState,
+    };
+
+    try {
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_BACKEND_URL + "/api/v1/tv-shows/",
+        payload,
+        { withCredentials: true }
+      );
+
+      // refetch user tv shows after changes
+      useUserAllTvShowsStore.getState().fetchUserTvShows();
+      console.log(response.data);
+    } catch (err) {
+      console.error("Failed to update tv show:", err);
+    }
+  };
+
+  // handlers rating change
+  const handleRatingChange = (_: any, data: { value: number }) => {
+    setUserRating(data.value); // updating the rating state
+    sendTvShowUpdate({ tvShowRating: data.value }); // update the backend
+  };
+
+  // handle progress state
+  const handleStateChange = (state: FilterStatesType) => {
+    setProgressState(state); // updating the progress state
+    sendTvShowUpdate({ tvShowStates: state });
+  };
+
   return (
     <section className="relative w-full  gap-5 sm:grid grid-cols-[1fr_2fr] overflow-hidden text-foreground font-poppins px-6 sm:px-0">
       {isLoading ? (
@@ -102,18 +145,12 @@ export default function TvContentHero() {
 
             {/* give your rating */}
             <div className="flex flex-col sm:flex-row gap-5 justify-between">
-              <Rating
-                value={userRating}
-                onChange={(_, data) => setUserRating(data.value)}
-              />
+              <Rating value={userRating} onChange={handleRatingChange} />
 
               {/* user tv show progress state */}
-              <div className="flex justify-start">
-                <StateFilter
-                  onChange={(state: string) =>
-                    setProgressState(state as FilterStatesType)
-                  }
-                />
+              <div className="flex items-center justify-start gap-2 sm:text-sm xl:text-base font-medium">
+                <StateFilter onChange={handleStateChange} />
+                <span>{": " + progressState}</span>
               </div>
             </div>
             {/* genres */}
