@@ -41,7 +41,7 @@ export default function TvContentHero() {
     }
   }, [session, OneTvshowDetails, userAllTvShows]);
 
-  // send update to backend (optimistic UI already applied by callers)
+  // send update to backend
   const sendTvShowUpdate = async ({
     tvShowRating,
     tvShowStates,
@@ -148,7 +148,7 @@ export default function TvContentHero() {
               <Rating value={userRating} onChange={handleRatingChange} />
 
               {/* user tv show progress state */}
-              <div className="flex items-center justify-start gap-2 sm:text-sm xl:text-base font-medium">
+              <div className="flex items-center justify-start gap-2 text-xs sm:text-sm xl:text-base font-medium">
                 <StateFilter onChange={handleStateChange} />
                 <span>{": " + progressState}</span>
               </div>
