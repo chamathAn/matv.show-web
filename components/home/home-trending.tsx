@@ -1,73 +1,41 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import { useStore } from "zustand";
-import { useTrendingMovies } from "@/Stores/Home/useTrendingMovies";
-import { TrendingMoviesType } from "@/Shared/Types/movie-api.types";
+import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
+import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
+import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
 import Image from "next/image";
-import { TrendingTvShowsType } from "@/Shared/Types/tvshows-api.types";
-import { useTrendingTvshows } from "@/Stores/Home/useTrendingTvshows";
 import clsx from "clsx";
-import { useTrendingAnimes } from "@/Stores/Home/useTrendingAnime";
-import { TrendingAnimeType } from "@/Shared/Types/anime-api.types";
+import useTrendingMediaData from "@/Hooks/useTrendingMediaData"; // make sure this path is correct
 
 export default function HomeTrending() {
   const [chosenMediaType, setChosenMediaType] = useState<
     "movies" | "tvshows" | "animes"
-  >("movies"); // tv shows, movies, animes filter
+  >("movies"); // movies, tvshows, animes filter
 
-  // fetch trending tv shows
-  const trendingTvShows: TrendingTvShowsType[] = useStore(
-    useTrendingTvshows,
-    (state) => state.trendingTvshows
-  );
-  useEffect(() => {
-    if (useTrendingTvshows.getState().isTrendingTvshowsFetched) return;
-    useTrendingTvshows.getState().fetchTrendingTvshows();
-  }, []);
+  // Media combined from stores
+  const { trendingAnimes, trendingMovies, trendingTvshows } =
+    useTrendingMediaData();
 
-  // fetch trending movies
-  const trendingMovies: TrendingMoviesType[] = useStore(
-    useTrendingMovies,
-    (state) => state.trendingMovies
-  );
-  useEffect(() => {
-    if (useTrendingMovies.getState().isTrendingMoviesFetched) return;
-    useTrendingMovies.getState().fetchTrendingMovies();
-  }, []);
-
-  // fetch trending animes
-  const trendingAnimes: TrendingAnimeType[] = useStore(
-    useTrendingAnimes,
-    (state) => state.trendingAnimes
-  );
-  useEffect(() => {
-    if (useTrendingAnimes.getState().isTrendingAnimesFetched) return;
-    useTrendingAnimes.getState().fetchTrendingAnimes();
-  }, []);
-
-  // combine tv shows, movies and animes
-  const combinedTrendingObj = useMemo(() => {
-    return {
-      tvshows: [...trendingTvShows.slice(0, 5)],
-      movies: [...trendingMovies.slice(0, 5)],
-      animes: [...trendingAnimes.slice(0, 5)],
-    };
-  }, [trendingTvShows, trendingMovies, trendingAnimes]);
-
-  // dynamic list of trending media
+  const combinedTrendingObj = {
+    movies: trendingMovies.slice(0, 10), // slice first 10
+    tvshows: trendingTvshows.slice(0, 10),
+    animes: trendingAnimes.slice(0, 10),
+  };
+  // Dynamic list based on selected media type
   const currentList = combinedTrendingObj[chosenMediaType] || [];
 
+  // Dynamic image resolver
   const getImageUrl = (
-    item: TrendingAnimeType | TrendingMoviesType | TrendingTvShowsType
+    item: AnimeFullDetailsType | OneMovieDetailsType | OneTvshowDetailsType
   ) => {
-    if ("backdrop_path" in item && item.backdrop_path) {
-      return `https://image.tmdb.org/t/p/original${item.backdrop_path}`; // Movie/TV Show
-    } else if ((item as TrendingAnimeType).images?.jpg?.image_url) {
-      return (item as TrendingAnimeType).images.jpg.image_url; // Anime
+    if ("backdrop_path" in item) {
+      return `https://image.tmdb.org/t/p/original${item.backdrop_path}`; // Movie or TV show
+    } else if (item.images?.jpg?.image_url) {
+      return item.images.jpg.image_url; // Anime
     } else {
       return "";
     }
@@ -75,7 +43,7 @@ export default function HomeTrending() {
 
   return (
     <section className="w-full px-6 pt-10 space-y-5 text-foreground h-fit sm:px-0">
-      {/* trending titles, and filters */}
+      {/* trending titles and filters */}
       <div className="flex flex-col items-start justify-between w-full h-fit sm:flex-row sm:items-center">
         <div className="flex items-center gap-4">
           <h3 className="text-2xl font-bold leading-loose font-roboto text-nowrap sm:text-3xl lg:text-4xl">
@@ -85,7 +53,7 @@ export default function HomeTrending() {
             variant={"secondary"}
             className="hidden text-xs sm:text-sm md:block"
           >
-            See all
+            Explore All
           </Button>
         </div>
 
@@ -123,29 +91,39 @@ export default function HomeTrending() {
         </div>
       </div>
 
-      {/* trending media */}
+      {/* trending list */}
       <ScrollArea className="w-full rounded-md whitespace-nowrap">
         <div className="flex pb-4 space-x-4 h-fit w-max">
           {currentList &&
             currentList.map((x, i) => (
               <Card
                 key={i}
-                className="w-32 py-0 bg-transparent border-0 rounded-md sm:w-40 "
+                className="w-32 py-0 bg-transparent border-0 rounded-md sm:w-40"
               >
                 <CardContent className="px-0 h-44 sm:h-60">
                   <Image
-                    className="object-cover w-full h-full rounded-md "
-                    src={getImageUrl(x)}
+                    className="object-cover w-full h-full rounded-md"
+                    src={getImageUrl(
+                      x as unknown as
+                        | AnimeFullDetailsType
+                        | OneMovieDetailsType
+                        | OneTvshowDetailsType
+                    )}
                     alt={
                       "title" in x
                         ? x.title
                         : "name" in x
                         ? x.name
-                        : (x as TrendingAnimeType).title || ""
+                        : (x as AnimeFullDetailsType).title || ""
                     }
                     width={500}
                     height={500}
-                    blurDataURL={getImageUrl(x)}
+                    blurDataURL={getImageUrl(
+                      x as unknown as
+                        | AnimeFullDetailsType
+                        | OneMovieDetailsType
+                        | OneTvshowDetailsType
+                    )}
                     placeholder="blur"
                   />
                 </CardContent>
@@ -155,7 +133,7 @@ export default function HomeTrending() {
                       ? x.title
                       : "name" in x
                       ? x.name
-                      : (x as TrendingAnimeType).title || ""}
+                      : (x as AnimeFullDetailsType).title || ""}
                   </span>
                 </CardFooter>
               </Card>

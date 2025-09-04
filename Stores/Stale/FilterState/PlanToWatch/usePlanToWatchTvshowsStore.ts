@@ -1,6 +1,6 @@
 import axios from "axios";
 import { createStore } from "zustand";
-import { OneTvshowDetailsType } from "../../Shared/Types/tvshows-api.types";
+import { OneTvshowDetailsType } from "../../../../Shared/Types/tvshows-api.types";
 
 type PlanToWatchTvshowsStore = {
   planToWatchTvshows: OneTvshowDetailsType[];

@@ -12,13 +12,13 @@ import {
 } from "@/components/sliders/EmblaCarouselDotButton";
 import Autoplay from "embla-carousel-autoplay";
 import { cn } from "@/lib/utils";
-import { useAnimeRecommendationStore } from "@/Stores/Home/useAnimeRecommendationStore";
+import { useAnimeRecommendationStore } from "@/Stores/Stale/Recommendation/useAnimeRecommendationStore";
 import { useStore } from "zustand";
 import Image from "next/image";
-import { useMovieRecommendationStore } from "@/Stores/Home/useMovieRecommendationStore";
+import { useMovieRecommendationStore } from "@/Stores/Stale/Recommendation/useMovieRecommendationStore";
 import { MovieRecommendationType } from "@/Shared/Types/movie-api.types";
 import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
-import { useTvshowRecommendationStore } from "@/Stores/Home/useTvshowsRecommendationStore";
+import { useTvshowRecommendationStore } from "@/Stores/Stale/Recommendation/useTvshowsRecommendationStore";
 import { TvshowRecommendationType } from "@/Shared/Types/tvshows-api.types";
 import { useMediaQuery } from "react-responsive";
 import { Button } from "../ui/button";

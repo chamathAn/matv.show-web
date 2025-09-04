@@ -1,64 +1,33 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import { useStore } from "zustand";
-import { usePlanToWatchMoviesStore } from "@/Stores/Home/usePlanToWatchMovieStore";
-import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
 import Image from "next/image";
+import clsx from "clsx";
+
+import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
+import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
 import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
 
-import clsx from "clsx";
-import { usePlanToWatchAnimesStore } from "@/Stores/Home/usePlanToWatchAnimes";
-import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
-import { usePlanToWatchTvshowsStore } from "@/Stores/Home/usePlanToWatchTvshowsStore";
+import usePlanToWatchData from "@/Hooks/usePlanToWatchData";
 
 export default function HomePlanToWatch() {
   const [chosenMediaType, setChosenMediaType] = useState<
     "movies" | "tvshows" | "animes"
   >("movies"); // tv shows, movies, animes filter
 
-  // fetch plan to watch tv shows
-  const planToWatchTvShows: OneTvshowDetailsType[] = useStore(
-    usePlanToWatchTvshowsStore,
-    (state) => state.planToWatchTvshows
-  );
-  useEffect(() => {
-    if (usePlanToWatchTvshowsStore.getState().isPlanToWatchTvshowsFetched)
-      return;
-    usePlanToWatchTvshowsStore.getState().fetchPlanToWatchTvshows();
-  }, []);
-
-  // fetch plan to watch movies
-  const planToWatchMovies: OneMovieDetailsType[] = useStore(
-    usePlanToWatchMoviesStore,
-    (state) => state.planToWatchMovies
-  );
-  useEffect(() => {
-    if (usePlanToWatchMoviesStore.getState().isPlanToWatchMoviesFetched) return;
-    usePlanToWatchMoviesStore.getState().fetchPlanToWatchMovies();
-  }, []);
-
-  // fetch plan to watch animes
-  const planToWatchAnimes: AnimeFullDetailsType[] = useStore(
-    usePlanToWatchAnimesStore,
-    (state) => state.planToWatchAnimes
-  );
-  useEffect(() => {
-    if (usePlanToWatchAnimesStore.getState().isPlanToWatchAnimesFetched) return;
-    usePlanToWatchAnimesStore.getState().fetchPlanToWatchAnimes();
-  }, []);
+  // get data from plan-to-watch stores
+  const { planToWatchMovies, planToWatchTvshows, planToWatchAnimes } =
+    usePlanToWatchData();
 
   // combine tv shows, movies and animes
-  const combinedPlanToWatchObj = useMemo(() => {
-    return {
-      tvshows: [...planToWatchTvShows],
-      movies: [...planToWatchMovies],
-      animes: [...planToWatchAnimes],
-    };
-  }, [planToWatchTvShows, planToWatchMovies, planToWatchAnimes]);
+  const combinedPlanToWatchObj = {
+    tvshows: [...planToWatchTvshows].slice(0, 10),
+    movies: [...planToWatchMovies].slice(0, 10),
+    animes: [...planToWatchAnimes].slice(0, 10),
+  };
 
   // dynamic list of plan to watch
   const currentList = combinedPlanToWatchObj[chosenMediaType] || [];

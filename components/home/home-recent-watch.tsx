@@ -1,18 +1,15 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import { useStore } from "zustand";
-import { useRecentlyWatchedMoviesStore } from "@/Stores/Home/useRecentlyWatchedMoviesStore";
 import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
 import Image from "next/image";
 import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
-import { useRecentlyWatchedTvshowsStore } from "@/Stores/Home/useRecentlyWatchedTvshowsStore";
-import clsx from "clsx";
-import { useRecentlyWatchedAnimesStore } from "@/Stores/Home/useRecentlyWatchedAnimeStore";
 import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
+import clsx from "clsx";
+import { useRecentlyWatched } from "@/Hooks/useRecentlyWatched";
 
 export default function HomeRecentWatch() {
   // ! checkout the useRecentlyWatchedAnimesStore to see how to fetch recently watched animes/ movies/tv shows's id from backend
@@ -21,47 +18,18 @@ export default function HomeRecentWatch() {
     "movies" | "tvshows" | "animes"
   >("movies"); // tv shows, movies, animes filter
 
-  // fetch recently watched tv shows
-  const recenltyWatchedTvShows: OneTvshowDetailsType[] = useStore(
-    useRecentlyWatchedTvshowsStore,
-    (state) => state.recentlyWatchedTvshows
-  );
-  useEffect(() => {
-    if (
-      useRecentlyWatchedTvshowsStore.getState().isRecentlyWatchedTvshowsFetched
-    )
-      return;
-    useRecentlyWatchedTvshowsStore.getState().fetchRecentlyWatchedTvshows();
-  }, []);
-
-  // fetch recently watched movies
-  const recenltyWatchedMovies: OneMovieDetailsType[] = useStore(
-    useRecentlyWatchedMoviesStore,
-    (state) => state.recentlyWatchedMovies
-  );
-  useEffect(() => {
-    if (useRecentlyWatchedMoviesStore.getState().isRecentlyWatchedMoviesFetched)
-      return;
-    useRecentlyWatchedMoviesStore.getState().fetchRecentlyWatchedMovies();
-  }, []);
-
-  // fetch recently watched animes
-  const recentlyWatchedAnimes: AnimeFullDetailsType[] = useStore(
-    useRecentlyWatchedAnimesStore,
-    (state) => state.recentlyWatchedAnimes
-  );
-  useEffect(() => {
-    if (useRecentlyWatchedAnimesStore.getState().isRecentlyWatchedAnimesFetched)
-      return;
-    useRecentlyWatchedAnimesStore.getState().fetchRecentlyWatchedAnimes();
-  }, []);
+  const {
+    recenltyWatchedMovies,
+    recenltyWatchedTvShows,
+    recentlyWatchedAnimes,
+  } = useRecentlyWatched();
 
   // combine tv shows, movies and animes
   const combinedRecentlyWatchedObj = useMemo(() => {
     return {
-      tvshows: [...recenltyWatchedTvShows],
-      movies: [...recenltyWatchedMovies],
-      animes: [...recentlyWatchedAnimes],
+      tvshows: [...recenltyWatchedTvShows.slice(0, 10)],
+      movies: [...recenltyWatchedMovies.slice(0, 10)],
+      animes: [...recentlyWatchedAnimes.slice(0, 10)],
     };
   }, [recenltyWatchedTvShows, recenltyWatchedMovies, recentlyWatchedAnimes]);
 
@@ -72,13 +40,14 @@ export default function HomeRecentWatch() {
     item: AnimeFullDetailsType | OneMovieDetailsType | OneTvshowDetailsType
   ) => {
     if ("backdrop_path" in item) {
-      return `https://image.tmdb.org/t/p/original${item.backdrop_path}`; // Movie
+      return `https://image.tmdb.org/t/p/original${item.backdrop_path}`;
     } else if (item.images?.jpg?.image_url) {
-      return item.images.jpg.image_url; // Anime
+      return item.images.jpg.image_url;
     } else {
       return "";
     }
   };
+
   return (
     <section className="w-full px-6 pt-10 space-y-5 text-foreground h-fit sm:px-0">
       {/* recently watched titles, and filters */}
@@ -129,7 +98,7 @@ export default function HomeRecentWatch() {
         </div>
       </div>
 
-      {/* recent movies */}
+      {/* recent media */}
       <ScrollArea className="w-full rounded-md whitespace-nowrap">
         <div className="flex pb-4 space-x-4 h-fit w-max">
           {currentList &&

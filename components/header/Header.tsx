@@ -179,7 +179,9 @@ const Navigation = () => {
             className={clsx(
               "flex text-xs flex-col gap-y-1 py-2 items-center justify-center",
               {
-                "text-accent": href === pathname,
+                "text-accent":
+                  (href === "/" && pathname === "/") ||
+                  (href !== "/" && pathname.startsWith(href)),
 
                 "transition-all duration-300": true,
               }
@@ -235,7 +237,9 @@ const MobibleNavigation = () => {
             className={clsx(
               "flex text-xs flex-col gap-y-1 py-2 items-center text-nowrap justify-center",
               {
-                "text-accent": href === pathname,
+                "text-accent":
+                  (href === "/" && pathname === "/") ||
+                  (href !== "/" && pathname.startsWith(href)),
 
                 "transition-all duration-300": true,
               }
