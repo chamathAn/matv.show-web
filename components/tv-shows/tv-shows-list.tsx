@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import StateFilter from "../filter/state-filter";
 import { Separator } from "../ui/separator";
 import clsx from "clsx";
@@ -19,6 +19,11 @@ import {
   PaginationPrevious,
 } from "../ui/pagination";
 import Link from "next/link";
+import usePlanToWatchData from "@/Hooks/FilterState/PlanToWatch/usePlanToWatchData";
+import useCompletedData from "@/Hooks/FilterState/Completed/useCompletedData";
+import useDroppedData from "@/Hooks/FilterState/Dropped/useDroppedData";
+import useOnholdData from "@/Hooks/FilterState/Onhold/useOnholdData";
+import useWatchingData from "@/Hooks/FilterState/Watching/useWatchingData";
 export default function TvShowsList() {
   const { trendingTvshows } = useTrendingMediaData(); // trending tv shows
   const [chosenMediaType, setChosenMediaType] = useState<
@@ -26,19 +31,51 @@ export default function TvShowsList() {
   >("");
 
   // user tv show progress state
-  const [chosenState, setChosenState] = useQueryState<FilterStatesType>(
+  const [chosenState, setChosenState] = useQueryState<FilterStatesType | "">(
     "state",
-    { defaultValue: "watching" as FilterStatesType }
+    { defaultValue: "" }
   );
+  // fetch state data
+  const planToWatchData = usePlanToWatchData();
+  const completedData = useCompletedData();
+  const droppedData = useDroppedData();
+  const onholdData = useOnholdData();
+  const watchingData = useWatchingData();
 
   // pagination settings
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 30;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = trendingTvshows
-    .slice(0, 20)
-    .slice(indexOfFirstItem, indexOfLastItem);
+
+  // select items based on chosenState
+  const filteredTvshows = useMemo(() => {
+    switch (chosenState) {
+      case "planToWatch":
+        return planToWatchData.planToWatchTvshows;
+      case "complete":
+        return completedData.completedTvshows;
+      case "dropped":
+        return droppedData.droppedTvshows;
+      case "onhold":
+        return onholdData.onholdTvshows;
+      case "watching":
+        return watchingData.watchingTvshows;
+      default:
+        return trendingTvshows.slice(0, 20);
+    }
+  }, [
+    chosenState,
+    planToWatchData.planToWatchTvshows,
+    completedData.completedTvshows,
+    droppedData.droppedTvshows,
+    onholdData.onholdTvshows,
+    watchingData.watchingTvshows,
+    trendingTvshows,
+  ]);
+
+  // setting the filtered tv shows
+  const currentItems = filteredTvshows.slice(indexOfFirstItem, indexOfLastItem);
   return (
     <section className="relative mt-10 px-6 sm:px-0 font-poppins w-full flex flex-col gap-y-5 lg:-mt-20 z-20 overflow-hidden text-foreground">
       {/* title */}
