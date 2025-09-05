@@ -3,30 +3,31 @@ import { createStore } from "zustand";
 import { OneTvshowDetailsType } from "../../../../Shared/Types/tvshows-api.types";
 import { useUserAllTvShowsStore } from "../../UserAll/useUserAllMATStore";
 
-type PlanToWatchTvshowsStore = {
-  planToWatchTvshows: OneTvshowDetailsType[];
-  isPlanToWatchTvshowsFetched: boolean;
-  fetchPlanToWatchTvshows: () => void;
+type CompletedTvshowsStore = {
+  completedTvshows: OneTvshowDetailsType[];
+  isCompletedTvshowsFetched: boolean;
+  fetchCompletedTvshows: () => void;
 };
 
-export const usePlanToWatchTvshowsStore =
-  createStore<PlanToWatchTvshowsStore>()((set) => ({
-    planToWatchTvshows: [],
-    isPlanToWatchTvshowsFetched: false,
+export const useCompletedTvshowsStore = createStore<CompletedTvshowsStore>()(
+  (set) => ({
+    completedTvshows: [],
+    isCompletedTvshowsFetched: false,
 
-    fetchPlanToWatchTvshows: async () => {
+    fetchCompletedTvshows: async () => {
       try {
         // fetch user tv shows from backend
         await useUserAllTvShowsStore.getState().fetchUserTvShows();
 
-        const planToWatchDBTvShows = useUserAllTvShowsStore
+        const completedDBTvShows = useUserAllTvShowsStore
           .getState()
           .userAllTvShows.filter(
-            (tvshow) => tvshow.tvShowStates === "planToWatch"
+            (tvshow) => tvshow.tvShowStates === "complete"
           );
 
-        const tvshowIds = planToWatchDBTvShows.map((tvshow) => tvshow.tvShowId);
+        const tvshowIds = completedDBTvShows.map((tvshow) => tvshow.tvShowId);
         if (tvshowIds.length === 0) return; // if user has no tv shows, return
+
         const tvRequests = tvshowIds.map((id) =>
           axios.get(`https://api.themoviedb.org/3/tv/${id}`, {
             headers: {
@@ -38,15 +39,15 @@ export const usePlanToWatchTvshowsStore =
         );
 
         const responses = await Promise.all(tvRequests);
-
         const tvData = responses.map((res) => res.data);
 
         set({
-          planToWatchTvshows: tvData,
-          isPlanToWatchTvshowsFetched: true,
+          completedTvshows: tvData,
+          isCompletedTvshowsFetched: true,
         });
       } catch (error) {
-        console.error("Error fetching plan to watch TV shows:", error);
+        console.error("Error fetching completed TV shows:", error);
       }
     },
-  }));
+  })
+);

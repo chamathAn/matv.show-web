@@ -25,9 +25,14 @@ export default function TvContentHero() {
   // progress state
   const [progressState, setProgressState] = useState<FilterStatesType | "">("");
 
-  // This does NOT send anything to the backend; it only sets the UI.
   useEffect(() => {
-    if (!session || !OneTvshowDetails || !userAllTvShows) return;
+    if (
+      !session ||
+      !OneTvshowDetails ||
+      OneTvshowDetails === undefined ||
+      !userAllTvShows
+    )
+      return;
 
     // check if the tv show is in the user's list
     const isMatched = userAllTvShows.find(
