@@ -1,6 +1,7 @@
 import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
 import axios from "axios";
 import { createStore } from "zustand";
+import { useUserAllMoviesStore } from "../../UserAll/useUserAllMATStore";
 
 type DroppedMoviesStore = {
   droppedMovies: OneMovieDetailsType[];
@@ -15,8 +16,14 @@ export const useDroppedMoviesStore = createStore<DroppedMoviesStore>()(
 
     fetchDroppedMovies: async () => {
       try {
-        // * Sample dropped movie IDs
-        const movieIds = [13, 769, 550, 122]; // e.g., Fast & Furious, Titanic, Fight Club, The Lord of the Rings
+        await useUserAllMoviesStore.getState().fetchUserMovies();
+
+        const completedDBmovies = useUserAllMoviesStore
+          .getState()
+          .userAllMovies.filter((movie) => movie.movieStates === "dropped");
+
+        const movieIds = completedDBmovies.map((movie) => movie.movieId);
+        if (movieIds.length === 0) return; // if user has no movies, return
 
         const movieRequests = movieIds.map((id) =>
           axios.get(`https://api.themoviedb.org/3/movie/${id}`, {

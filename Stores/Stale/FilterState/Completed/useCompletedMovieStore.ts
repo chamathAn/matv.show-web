@@ -1,6 +1,7 @@
 import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
 import axios from "axios";
 import { createStore } from "zustand";
+import { useUserAllMoviesStore } from "../../UserAll/useUserAllMATStore";
 
 type CompletedMoviesStore = {
   completedMovies: OneMovieDetailsType[];
@@ -15,8 +16,15 @@ export const useCompletedMoviesStore = createStore<CompletedMoviesStore>()(
 
     fetchCompletedMovies: async () => {
       try {
-        // * Sample Ids for completed movies
-        const movieIds = [157336, 278, 238, 680]; // Interstellar, Shawshank, Godfather, Pulp Fiction
+        // fetch user tv shows from backend
+        await useUserAllMoviesStore.getState().fetchUserMovies();
+
+        const completedDBmovies = useUserAllMoviesStore
+          .getState()
+          .userAllMovies.filter((movie) => movie.movieStates === "complete");
+
+        const movieIds = completedDBmovies.map((movie) => movie.movieId);
+        if (movieIds.length === 0) return; // if user has no movies, return
 
         const movieRequests = movieIds.map((id) =>
           axios.get(`https://api.themoviedb.org/3/movie/${id}`, {

@@ -1,6 +1,7 @@
 import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
 import axios from "axios";
 import { createStore } from "zustand";
+import { useUserAllMoviesStore } from "../../UserAll/useUserAllMATStore";
 
 type PlanToWatchMoviesStore = {
   planToWatchMovies: OneMovieDetailsType[];
@@ -15,8 +16,14 @@ export const usePlanToWatchMoviesStore = createStore<PlanToWatchMoviesStore>()(
 
     fetchPlanToWatchMovies: async () => {
       try {
-        // * Sample Ids
-        const movieIds = [550, 299536, 603, 424];
+        await useUserAllMoviesStore.getState().fetchUserMovies();
+
+        const completedDBmovies = useUserAllMoviesStore
+          .getState()
+          .userAllMovies.filter((movie) => movie.movieStates === "planToWatch");
+
+        const movieIds = completedDBmovies.map((movie) => movie.movieId);
+        if (movieIds.length === 0) return; // if user has no movies, return
 
         const movieRequests = movieIds.map((id) =>
           axios.get(`https://api.themoviedb.org/3/movie/${id}`, {
