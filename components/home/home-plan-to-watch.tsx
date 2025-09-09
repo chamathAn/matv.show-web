@@ -6,12 +6,12 @@ import { Card, CardContent, CardFooter } from "../ui/card";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import Image from "next/image";
 import clsx from "clsx";
-
+import FP from "@/app/assets/FallbackPreview.png";
 import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
 import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
 import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
 
-import usePlanToWatchData from "@/Hooks/usePlanToWatchData";
+import usePlanToWatchData from "@/Hooks/FilterState/PlanToWatch/usePlanToWatchData";
 
 export default function HomePlanToWatch() {
   const [chosenMediaType, setChosenMediaType] = useState<
@@ -35,9 +35,9 @@ export default function HomePlanToWatch() {
   const getImageUrl = (
     item: AnimeFullDetailsType | OneMovieDetailsType | OneTvshowDetailsType
   ) => {
-    if ("backdrop_path" in item) {
+    if ("backdrop_path" in item && item.backdrop_path) {
       return `https://image.tmdb.org/t/p/original${item.backdrop_path}`; // Movie or TV show
-    } else if (item.images?.jpg?.image_url) {
+    } else if ("images" in item && item.images?.jpg?.image_url) {
       return item.images.jpg.image_url; // Anime
     } else {
       return "";
@@ -106,7 +106,7 @@ export default function HomePlanToWatch() {
                 <CardContent className="px-0 h-44 sm:h-60">
                   <Image
                     className="object-cover w-full h-full rounded-md "
-                    src={getImageUrl(x)}
+                    src={getImageUrl(x) || FP}
                     alt={
                       "title" in x
                         ? x.title
@@ -116,7 +116,7 @@ export default function HomePlanToWatch() {
                     }
                     width={500}
                     height={500}
-                    blurDataURL={getImageUrl(x)}
+                    blurDataURL={FP.src}
                     placeholder="blur"
                   />
                 </CardContent>

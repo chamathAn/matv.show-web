@@ -3,25 +3,25 @@ import axios from "axios";
 import { createStore } from "zustand";
 import { useUserAllAnimesStore } from "../../UserAll/useUserAllMATStore";
 
-type PlanToWatchAnimesStore = {
-  planToWatchAnimes: AnimeFullDetailsType[];
-  isPlanToWatchAnimesFetched: boolean;
-  fetchPlanToWatchAnimes: () => void;
+type DroppedAnimesStore = {
+  droppedAnimes: AnimeFullDetailsType[];
+  isDroppedAnimesFetched: boolean;
+  fetchDroppedAnimes: () => void;
 };
 
-export const usePlanToWatchAnimesStore = createStore<PlanToWatchAnimesStore>()(
+export const useDroppedAnimesStore = createStore<DroppedAnimesStore>()(
   (set) => ({
-    planToWatchAnimes: [],
-    isPlanToWatchAnimesFetched: false,
+    droppedAnimes: [],
+    isDroppedAnimesFetched: false,
 
-    fetchPlanToWatchAnimes: async () => {
+    fetchDroppedAnimes: async () => {
       try {
         // fetch user anime from backend
         await useUserAllAnimesStore.getState().fetchUserAnimes();
 
         const planToWatchDBanimes = useUserAllAnimesStore
           .getState()
-          .userAllAnimes.filter((anime) => anime.animeStates === "planToWatch");
+          .userAllAnimes.filter((anime) => anime.animeStates === "dropped");
 
         const animeIds = planToWatchDBanimes.map((anime) => anime.animeId);
         if (animeIds.length === 0) return; // if user has no anime, return
@@ -31,15 +31,11 @@ export const usePlanToWatchAnimesStore = createStore<PlanToWatchAnimesStore>()(
         );
 
         const responses = await Promise.all(animeRequests);
-
         const animeData = responses.map((res) => res.data.data);
 
-        set({
-          planToWatchAnimes: animeData,
-          isPlanToWatchAnimesFetched: true,
-        });
+        set({ droppedAnimes: animeData, isDroppedAnimesFetched: true });
       } catch (error) {
-        console.error("Error fetching plan to watch animes:", error);
+        console.error("Error fetching dropped animes:", error);
       }
     },
   })

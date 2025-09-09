@@ -2,23 +2,23 @@
 
 import StateFilter from "@/components/filter/state-filter";
 import { Skeleton } from "@/components/ui/skeleton";
-import useOneTvshowDetails from "@/Hooks/useOneTvshowDetails";
-import useUserAllTvShows from "@/Hooks/useUserAllTvShows";
+import useOneMovieDetails from "@/Hooks/useOneMovieDetails";
+import useUserAllMovies from "@/Hooks/useUserAllMovies";
 import { authClient } from "@/lib/auth-client";
 import { FilterStatesType } from "@/Shared/Types/filter-states.types";
-import { useUserAllTvShowsStore } from "@/Stores/Stale/UserAll/useUserAllMATStore";
+import { useUserAllMoviesStore } from "@/Stores/Stale/UserAll/useUserAllMATStore";
 import { Rating } from "@fluentui/react-rating";
 import axios from "axios";
 import { BookHeart, Star, Vote } from "lucide-react";
 import Image from "next/image";
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export default function TvContentHero() {
+export default function MovieContentHero() {
   const { data: session } = authClient.useSession();
-  const { OneTvshowDetails, isLoading } = useOneTvshowDetails();
+  const { oneMovieDetails, isLoading } = useOneMovieDetails();
 
-  // user all tv shows
-  const { userAllTvShows } = useUserAllTvShows();
+  // user all movies
+  const { userAllMovies } = useUserAllMovies();
 
   // rating
   const [userRating, setUserRating] = useState(0);
@@ -28,66 +28,66 @@ export default function TvContentHero() {
   useEffect(() => {
     if (
       !session ||
-      !OneTvshowDetails ||
-      OneTvshowDetails === undefined ||
-      !userAllTvShows
+      !oneMovieDetails ||
+      oneMovieDetails === undefined ||
+      !userAllMovies
     )
       return;
 
-    // check if the tv show is in the user's list
-    const isMatched = userAllTvShows.find(
-      (tvShow) => tvShow.tvShowId === OneTvshowDetails.id.toString()
+    // check if the anime is in the user's list
+    const isMatched = userAllMovies.find(
+      (movie) => movie.movieId === oneMovieDetails.id.toString()
     );
 
     // setting the rating and progress state
     if (isMatched) {
-      setUserRating(isMatched.tvShowRating);
-      setProgressState(isMatched.tvShowStates as FilterStatesType);
+      setUserRating(isMatched.movieRating);
+      setProgressState(isMatched.movieStates as FilterStatesType);
     }
-  }, [session, OneTvshowDetails, userAllTvShows]);
+  }, [session, oneMovieDetails, userAllMovies]);
 
   // send update to backend
-  const sendTvShowUpdate = async ({
-    tvShowRating,
-    tvShowStates,
+  const sendmovieUpdate = async ({
+    movieRating,
+    movieStates,
   }: {
-    tvShowRating?: number;
-    tvShowStates?: FilterStatesType | "";
+    movieRating?: number;
+    movieStates?: FilterStatesType | "";
   }) => {
-    if (!session || !OneTvshowDetails) return;
+    if (!session || !oneMovieDetails) return;
 
     const payload = {
-      tvShowId: OneTvshowDetails.id.toString(),
+      movieId: oneMovieDetails.id.toString(),
       userId: session?.user.id,
-      tvShowRating: tvShowRating ?? userRating,
-      tvShowStates: tvShowStates ?? progressState,
+      movieRating: movieRating ?? userRating,
+      movieStates: movieStates ?? progressState,
     };
 
     try {
       const response = await axios.post(
-        process.env.NEXT_PUBLIC_BACKEND_URL + "/api/v1/tv-shows/",
+        process.env.NEXT_PUBLIC_BACKEND_URL + "/api/v1/movies/",
         payload,
         { withCredentials: true }
       );
 
-      // refetch user tv shows after changes
-      useUserAllTvShowsStore.getState().fetchUserTvShows();
+      // refetch user movies after changes
+      useUserAllMoviesStore.getState().fetchUserMovies();
       console.log(response.data);
     } catch (err) {
-      console.error("Failed to update tv show:", err);
+      console.error("Failed to update movie:", err);
     }
   };
 
   // handlers rating change
   const handleRatingChange = (_: any, data: { value: number }) => {
     setUserRating(data.value); // updating the rating state
-    sendTvShowUpdate({ tvShowRating: data.value }); // update the backend
+    sendmovieUpdate({ movieRating: data.value }); // update the backend
   };
 
   // handle progress state
   const handleStateChange = (state: FilterStatesType) => {
     setProgressState(state); // updating the progress state
-    sendTvShowUpdate({ tvShowStates: state });
+    sendmovieUpdate({ movieStates: state });
   };
 
   return (
@@ -105,10 +105,10 @@ export default function TvContentHero() {
           {/* image */}
           <Image
             src={
-              `https://image.tmdb.org/t/p/original/${OneTvshowDetails.backdrop_path}` ||
+              `https://image.tmdb.org/t/p/original/${oneMovieDetails.backdrop_path}` ||
               ""
             }
-            alt={OneTvshowDetails.name || ""}
+            alt={oneMovieDetails.title || ""}
             width={1000}
             height={1000}
             className="w-auto h-full object-cover rounded-md"
@@ -117,14 +117,14 @@ export default function TvContentHero() {
           {/* title and descriptions */}
           <div className="flex flex-col gap-5 py-3">
             <h1 className="text-lg sm:text-2xl lg:text-4xl font-bold">
-              {OneTvshowDetails.name}
+              {oneMovieDetails.title}
             </h1>
             <div className="grid grid-cols-3">
               {/* rating */}
               <div className="flex flex-col size-full items-center gap-2">
                 <Star size={25} />
                 <p className="text-xs sm:text-sm font-medium">
-                  {OneTvshowDetails.vote_average + "/10"}
+                  {oneMovieDetails.vote_average + "/10"}
                 </p>
               </div>
 
@@ -132,7 +132,7 @@ export default function TvContentHero() {
               <div className="flex flex-col size-full items-center gap-2">
                 <Vote size={25} />
                 <p className="text-xs sm:text-sm font-medium">
-                  {OneTvshowDetails.vote_count + " votes"}
+                  {oneMovieDetails.vote_count + " votes"}
                 </p>
               </div>
 
@@ -146,13 +146,13 @@ export default function TvContentHero() {
             </div>
 
             {/* overview */}
-            <p className="text-sm sm:text-base">{OneTvshowDetails.overview}</p>
+            <p className="text-sm sm:text-base">{oneMovieDetails.overview}</p>
 
             {/* give your rating */}
             <div className="flex flex-col sm:flex-row gap-5 justify-between">
               <Rating value={userRating} onChange={handleRatingChange} />
 
-              {/* user tv show progress state */}
+              {/* user movie progress state */}
               <div className="flex items-center justify-start gap-2 text-xs sm:text-sm xl:text-base font-medium">
                 <StateFilter onChange={handleStateChange} />
                 <span>{": " + progressState}</span>
@@ -160,8 +160,8 @@ export default function TvContentHero() {
             </div>
             {/* genres */}
             <div className="flex flex-wrap gap-2 text-sm">
-              {OneTvshowDetails.genres &&
-                OneTvshowDetails.genres.map((genre) => (
+              {oneMovieDetails.genres &&
+                oneMovieDetails.genres.map((genre) => (
                   <p key={genre.id}>{genre.name}</p>
                 ))}
             </div>

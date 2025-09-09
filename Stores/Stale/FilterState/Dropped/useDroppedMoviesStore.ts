@@ -3,24 +3,24 @@ import axios from "axios";
 import { createStore } from "zustand";
 import { useUserAllMoviesStore } from "../../UserAll/useUserAllMATStore";
 
-type PlanToWatchMoviesStore = {
-  planToWatchMovies: OneMovieDetailsType[];
-  isPlanToWatchMoviesFetched: boolean;
-  fetchPlanToWatchMovies: () => void;
+type DroppedMoviesStore = {
+  droppedMovies: OneMovieDetailsType[];
+  isDroppedMoviesFetched: boolean;
+  fetchDroppedMovies: () => void;
 };
 
-export const usePlanToWatchMoviesStore = createStore<PlanToWatchMoviesStore>()(
+export const useDroppedMoviesStore = createStore<DroppedMoviesStore>()(
   (set) => ({
-    planToWatchMovies: [],
-    isPlanToWatchMoviesFetched: false,
+    droppedMovies: [],
+    isDroppedMoviesFetched: false,
 
-    fetchPlanToWatchMovies: async () => {
+    fetchDroppedMovies: async () => {
       try {
         await useUserAllMoviesStore.getState().fetchUserMovies();
 
         const completedDBmovies = useUserAllMoviesStore
           .getState()
-          .userAllMovies.filter((movie) => movie.movieStates === "planToWatch");
+          .userAllMovies.filter((movie) => movie.movieStates === "dropped");
 
         const movieIds = completedDBmovies.map((movie) => movie.movieId);
         if (movieIds.length === 0) return; // if user has no movies, return
@@ -36,15 +36,11 @@ export const usePlanToWatchMoviesStore = createStore<PlanToWatchMoviesStore>()(
         );
 
         const responses = await Promise.all(movieRequests);
-
         const movieData = responses.map((res) => res.data);
 
-        set({
-          planToWatchMovies: movieData,
-          isPlanToWatchMoviesFetched: true,
-        });
+        set({ droppedMovies: movieData, isDroppedMoviesFetched: true });
       } catch (error) {
-        console.error("Error fetching plan to watch movies:", error);
+        console.error("Error fetching dropped movies:", error);
       }
     },
   })

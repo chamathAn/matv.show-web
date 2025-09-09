@@ -3,25 +3,25 @@ import axios from "axios";
 import { createStore } from "zustand";
 import { useUserAllAnimesStore } from "../../UserAll/useUserAllMATStore";
 
-type PlanToWatchAnimesStore = {
-  planToWatchAnimes: AnimeFullDetailsType[];
-  isPlanToWatchAnimesFetched: boolean;
-  fetchPlanToWatchAnimes: () => void;
+type CompletedAnimesStore = {
+  completedAnimes: AnimeFullDetailsType[];
+  isCompletedAnimesFetched: boolean;
+  fetchCompletedAnimes: () => void;
 };
 
-export const usePlanToWatchAnimesStore = createStore<PlanToWatchAnimesStore>()(
+export const useCompletedAnimesStore = createStore<CompletedAnimesStore>()(
   (set) => ({
-    planToWatchAnimes: [],
-    isPlanToWatchAnimesFetched: false,
+    completedAnimes: [],
+    isCompletedAnimesFetched: false,
 
-    fetchPlanToWatchAnimes: async () => {
+    fetchCompletedAnimes: async () => {
       try {
         // fetch user anime from backend
         await useUserAllAnimesStore.getState().fetchUserAnimes();
 
         const planToWatchDBanimes = useUserAllAnimesStore
           .getState()
-          .userAllAnimes.filter((anime) => anime.animeStates === "planToWatch");
+          .userAllAnimes.filter((anime) => anime.animeStates === "completed");
 
         const animeIds = planToWatchDBanimes.map((anime) => anime.animeId);
         if (animeIds.length === 0) return; // if user has no anime, return
@@ -35,11 +35,11 @@ export const usePlanToWatchAnimesStore = createStore<PlanToWatchAnimesStore>()(
         const animeData = responses.map((res) => res.data.data);
 
         set({
-          planToWatchAnimes: animeData,
-          isPlanToWatchAnimesFetched: true,
+          completedAnimes: animeData,
+          isCompletedAnimesFetched: true,
         });
       } catch (error) {
-        console.error("Error fetching plan to watch animes:", error);
+        console.error("Error fetching completed animes:", error);
       }
     },
   })

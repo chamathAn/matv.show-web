@@ -3,24 +3,25 @@ import axios from "axios";
 import { createStore } from "zustand";
 import { useUserAllMoviesStore } from "../../UserAll/useUserAllMATStore";
 
-type PlanToWatchMoviesStore = {
-  planToWatchMovies: OneMovieDetailsType[];
-  isPlanToWatchMoviesFetched: boolean;
-  fetchPlanToWatchMovies: () => void;
+type CompletedMoviesStore = {
+  completedMovies: OneMovieDetailsType[];
+  isCompletedMoviesFetched: boolean;
+  fetchCompletedMovies: () => void;
 };
 
-export const usePlanToWatchMoviesStore = createStore<PlanToWatchMoviesStore>()(
+export const useCompletedMoviesStore = createStore<CompletedMoviesStore>()(
   (set) => ({
-    planToWatchMovies: [],
-    isPlanToWatchMoviesFetched: false,
+    completedMovies: [],
+    isCompletedMoviesFetched: false,
 
-    fetchPlanToWatchMovies: async () => {
+    fetchCompletedMovies: async () => {
       try {
+        // fetch user tv shows from backend
         await useUserAllMoviesStore.getState().fetchUserMovies();
 
         const completedDBmovies = useUserAllMoviesStore
           .getState()
-          .userAllMovies.filter((movie) => movie.movieStates === "planToWatch");
+          .userAllMovies.filter((movie) => movie.movieStates === "complete");
 
         const movieIds = completedDBmovies.map((movie) => movie.movieId);
         if (movieIds.length === 0) return; // if user has no movies, return
@@ -40,11 +41,11 @@ export const usePlanToWatchMoviesStore = createStore<PlanToWatchMoviesStore>()(
         const movieData = responses.map((res) => res.data);
 
         set({
-          planToWatchMovies: movieData,
-          isPlanToWatchMoviesFetched: true,
+          completedMovies: movieData,
+          isCompletedMoviesFetched: true,
         });
       } catch (error) {
-        console.error("Error fetching plan to watch movies:", error);
+        console.error("Error fetching completed movies:", error);
       }
     },
   })

@@ -30,7 +30,11 @@ const navItems = [
     label: "Overview",
     icon: <Target width={20} height={20} />,
   },
-  { href: "/anime", label: "Anime", icon: <ScanFace width={20} height={20} /> },
+  {
+    href: "/animes",
+    label: "Anime",
+    icon: <ScanFace width={20} height={20} />,
+  },
   {
     href: "/movies",
     label: "Movies",
