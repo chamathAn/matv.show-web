@@ -1,6 +1,7 @@
 import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
 import axios from "axios";
 import { createStore } from "zustand";
+import { useUserAllAnimesStore } from "../../UserAll/useUserAllMATStore";
 
 type WatchingAnimesStore = {
   watchingAnimes: AnimeFullDetailsType[];
@@ -15,8 +16,15 @@ export const useWatchingAnimesStore = createStore<WatchingAnimesStore>()(
 
     fetchWatchingAnimes: async () => {
       try {
-        // * Sample watching anime IDs
-        const animeIds = [1, 5114, 11061, 16498]; // Cowboy Bebop, FMAB, Hunter x Hunter, Fairy Tail
+        // fetch user anime from backend
+        await useUserAllAnimesStore.getState().fetchUserAnimes();
+
+        const planToWatchDBanimes = useUserAllAnimesStore
+          .getState()
+          .userAllAnimes.filter((anime) => anime.animeStates === "watching");
+
+        const animeIds = planToWatchDBanimes.map((anime) => anime.animeId);
+        if (animeIds.length === 0) return; // if user has no anime, return
 
         const animeRequests = animeIds.map((id) =>
           axios.get(`https://api.jikan.moe/v4/anime/${id}/full`)

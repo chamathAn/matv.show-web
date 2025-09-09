@@ -1,6 +1,7 @@
 import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
 import axios from "axios";
 import { createStore } from "zustand";
+import { useUserAllAnimesStore } from "../../UserAll/useUserAllMATStore";
 
 type OnholdAnimesStore = {
   onholdAnimes: AnimeFullDetailsType[];
@@ -14,8 +15,15 @@ export const useOnholdAnimesStore = createStore<OnholdAnimesStore>()((set) => ({
 
   fetchOnholdAnimes: async () => {
     try {
-      // * Sample onhold anime IDs
-      const animeIds = [16498, 11061, 20, 9253]; // Fairy Tail, Hunter x Hunter, Naruto, Steins;Gate
+      // fetch user anime from backend
+      await useUserAllAnimesStore.getState().fetchUserAnimes();
+
+      const planToWatchDBanimes = useUserAllAnimesStore
+        .getState()
+        .userAllAnimes.filter((anime) => anime.animeStates === "onhold");
+
+      const animeIds = planToWatchDBanimes.map((anime) => anime.animeId);
+      if (animeIds.length === 0) return; // if user has no anime, return
 
       const animeRequests = animeIds.map((id) =>
         axios.get(`https://api.jikan.moe/v4/anime/${id}/full`)
