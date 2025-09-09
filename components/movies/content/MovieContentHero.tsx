@@ -2,8 +2,7 @@
 
 import StateFilter from "@/components/filter/state-filter";
 import { Skeleton } from "@/components/ui/skeleton";
-import useOneAnimeDetails from "@/Hooks/useOneAnimeDetails";
-import useoneAnimeDetails from "@/Hooks/useoneAnimeDetails";
+import useOneMovieDetails from "@/Hooks/useOneMovieDetails";
 import useUserAllMovies from "@/Hooks/useUserAllMovies";
 import { authClient } from "@/lib/auth-client";
 import { FilterStatesType } from "@/Shared/Types/filter-states.types";
@@ -16,9 +15,9 @@ import React, { useEffect, useState } from "react";
 
 export default function MovieContentHero() {
   const { data: session } = authClient.useSession();
-  const { oneAnimeDetails, isLoading } = useOneAnimeDetails();
+  const { oneMovieDetails, isLoading } = useOneMovieDetails();
 
-  // user all tv shows
+  // user all movies
   const { userAllMovies } = useUserAllMovies();
 
   // rating
@@ -29,15 +28,15 @@ export default function MovieContentHero() {
   useEffect(() => {
     if (
       !session ||
-      !oneAnimeDetails ||
-      oneAnimeDetails === undefined ||
+      !oneMovieDetails ||
+      oneMovieDetails === undefined ||
       !userAllMovies
     )
       return;
 
-    // check if the tv show is in the user's list
+    // check if the anime is in the user's list
     const isMatched = userAllMovies.find(
-      (movie) => movie.movieId === oneAnimeDetails.id.toString()
+      (movie) => movie.movieId === oneMovieDetails.id.toString()
     );
 
     // setting the rating and progress state
@@ -45,7 +44,7 @@ export default function MovieContentHero() {
       setUserRating(isMatched.movieRating);
       setProgressState(isMatched.movieStates as FilterStatesType);
     }
-  }, [session, oneAnimeDetails, userAllMovies]);
+  }, [session, oneMovieDetails, userAllMovies]);
 
   // send update to backend
   const sendmovieUpdate = async ({
@@ -55,10 +54,10 @@ export default function MovieContentHero() {
     movieRating?: number;
     movieStates?: FilterStatesType | "";
   }) => {
-    if (!session || !oneAnimeDetails) return;
+    if (!session || !oneMovieDetails) return;
 
     const payload = {
-      movieId: oneAnimeDetails.id.toString(),
+      movieId: oneMovieDetails.id.toString(),
       userId: session?.user.id,
       movieRating: movieRating ?? userRating,
       movieStates: movieStates ?? progressState,
@@ -71,11 +70,11 @@ export default function MovieContentHero() {
         { withCredentials: true }
       );
 
-      // refetch user tv shows after changes
+      // refetch user movies after changes
       useUserAllMoviesStore.getState().fetchUserMovies();
       console.log(response.data);
     } catch (err) {
-      console.error("Failed to update tv show:", err);
+      console.error("Failed to update movie:", err);
     }
   };
 
@@ -106,10 +105,10 @@ export default function MovieContentHero() {
           {/* image */}
           <Image
             src={
-              `https://image.tmdb.org/t/p/original/${oneAnimeDetails.backdrop_path}` ||
+              `https://image.tmdb.org/t/p/original/${oneMovieDetails.backdrop_path}` ||
               ""
             }
-            alt={oneAnimeDetails.title || ""}
+            alt={oneMovieDetails.title || ""}
             width={1000}
             height={1000}
             className="w-auto h-full object-cover rounded-md"
@@ -118,14 +117,14 @@ export default function MovieContentHero() {
           {/* title and descriptions */}
           <div className="flex flex-col gap-5 py-3">
             <h1 className="text-lg sm:text-2xl lg:text-4xl font-bold">
-              {oneAnimeDetails.title}
+              {oneMovieDetails.title}
             </h1>
             <div className="grid grid-cols-3">
               {/* rating */}
               <div className="flex flex-col size-full items-center gap-2">
                 <Star size={25} />
                 <p className="text-xs sm:text-sm font-medium">
-                  {oneAnimeDetails.vote_average + "/10"}
+                  {oneMovieDetails.vote_average + "/10"}
                 </p>
               </div>
 
@@ -133,7 +132,7 @@ export default function MovieContentHero() {
               <div className="flex flex-col size-full items-center gap-2">
                 <Vote size={25} />
                 <p className="text-xs sm:text-sm font-medium">
-                  {oneAnimeDetails.vote_count + " votes"}
+                  {oneMovieDetails.vote_count + " votes"}
                 </p>
               </div>
 
@@ -147,13 +146,13 @@ export default function MovieContentHero() {
             </div>
 
             {/* overview */}
-            <p className="text-sm sm:text-base">{oneAnimeDetails.overview}</p>
+            <p className="text-sm sm:text-base">{oneMovieDetails.overview}</p>
 
             {/* give your rating */}
             <div className="flex flex-col sm:flex-row gap-5 justify-between">
               <Rating value={userRating} onChange={handleRatingChange} />
 
-              {/* user tv show progress state */}
+              {/* user movie progress state */}
               <div className="flex items-center justify-start gap-2 text-xs sm:text-sm xl:text-base font-medium">
                 <StateFilter onChange={handleStateChange} />
                 <span>{": " + progressState}</span>
@@ -161,8 +160,8 @@ export default function MovieContentHero() {
             </div>
             {/* genres */}
             <div className="flex flex-wrap gap-2 text-sm">
-              {oneAnimeDetails.genres &&
-                oneAnimeDetails.genres.map((genre) => (
+              {oneMovieDetails.genres &&
+                oneMovieDetails.genres.map((genre) => (
                   <p key={genre.id}>{genre.name}</p>
                 ))}
             </div>
