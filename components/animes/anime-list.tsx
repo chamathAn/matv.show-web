@@ -36,6 +36,7 @@ export default function AnimeList() {
     "state",
     { defaultValue: "" }
   );
+
   // fetch state data
   const planToWatchData = usePlanToWatchData();
   const completedData = useCompletedData();
@@ -50,6 +51,7 @@ export default function AnimeList() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
   // select items based on chosenState
+
   const filteredTvshows = useMemo(() => {
     switch (chosenState) {
       case "planToWatch":

@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { create } from "zustand";
+import { userLogStore } from "./userLogStore";
 
 interface UserAllTvShowsState {
   loading: boolean;
@@ -31,6 +32,7 @@ export const useUserAllTvShowsStore = create<UserAllTvShowsState>((set) => ({
   userAllTvShows: [],
   fetchUserTvShows: async () => {
     try {
+      if (!userLogStore.getState().isUserLoggedIn) return;
       set({ loading: true });
       const res = await axios.get(
         process.env.NEXT_PUBLIC_BACKEND_URL + "/api/v1/tv-shows/",
@@ -54,6 +56,7 @@ export const useUserAllMoviesStore = create<UserAllMoviesState>((set) => ({
   isUserMoviesFetched: false,
   userAllMovies: [],
   fetchUserMovies: async () => {
+    if (!userLogStore.getState().isUserLoggedIn) return;
     try {
       set({ loading: true });
       const res = await axios.get(
@@ -78,6 +81,7 @@ export const useUserAllAnimesStore = create<UserAllAnimesState>((set) => ({
   isUserAnimesFetched: false,
   userAllAnimes: [],
   fetchUserAnimes: async () => {
+    if (!userLogStore.getState().isUserLoggedIn) return;
     try {
       set({ loading: true });
       const res = await axios.get(

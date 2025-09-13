@@ -116,8 +116,6 @@ export default function HomePlanToWatch() {
                     }
                     width={500}
                     height={500}
-                    blurDataURL={FP.src}
-                    placeholder="blur"
                   />
                 </CardContent>
                 <CardFooter className="flex items-center justify-center font-medium font-poppins">

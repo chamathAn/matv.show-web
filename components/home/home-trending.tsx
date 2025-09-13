@@ -10,6 +10,7 @@ import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
 import Image from "next/image";
 import clsx from "clsx";
 import useTrendingMediaData from "@/Hooks/useTrendingMediaData"; // make sure this path is correct
+import FP from "@/app/assets/FallbackPreview.png";
 
 export default function HomeTrending() {
   const [chosenMediaType, setChosenMediaType] = useState<
@@ -103,12 +104,14 @@ export default function HomeTrending() {
                 <CardContent className="px-0 h-44 sm:h-60">
                   <Image
                     className="object-cover w-full h-full rounded-md"
-                    src={getImageUrl(
-                      x as unknown as
-                        | AnimeFullDetailsType
-                        | OneMovieDetailsType
-                        | OneTvshowDetailsType
-                    )}
+                    src={
+                      getImageUrl(
+                        x as unknown as
+                          | AnimeFullDetailsType
+                          | OneMovieDetailsType
+                          | OneTvshowDetailsType
+                      ) || FP
+                    }
                     alt={
                       "title" in x
                         ? x.title
@@ -118,13 +121,6 @@ export default function HomeTrending() {
                     }
                     width={500}
                     height={500}
-                    blurDataURL={getImageUrl(
-                      x as unknown as
-                        | AnimeFullDetailsType
-                        | OneMovieDetailsType
-                        | OneTvshowDetailsType
-                    )}
-                    placeholder="blur"
                   />
                 </CardContent>
                 <CardFooter className="flex items-center justify-center font-medium font-poppins">

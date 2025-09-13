@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { authClient } from "@/lib/auth-client";
 import { Skeleton } from "../ui/skeleton";
@@ -22,6 +22,22 @@ import Link from "next/link";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { userLogStore } from "@/Stores/Stale/UserAll/userLogStore";
+import { usePlanToWatchAnimesStore } from "@/Stores/Stale/FilterState/PlanToWatch/usePlanToWatchAnimes";
+import { usePlanToWatchMoviesStore } from "@/Stores/Stale/FilterState/PlanToWatch/usePlanToWatchMovieStore";
+import { usePlanToWatchTvshowsStore } from "@/Stores/Stale/FilterState/PlanToWatch/usePlanToWatchTvshowsStore";
+import { useCompletedAnimesStore } from "@/Stores/Stale/FilterState/Completed/useCompletedAnimes";
+import { useCompletedMoviesStore } from "@/Stores/Stale/FilterState/Completed/useCompletedMovieStore";
+import { useCompletedTvshowsStore } from "@/Stores/Stale/FilterState/Completed/useCompletedTvshowsStore";
+import { useDroppedAnimesStore } from "@/Stores/Stale/FilterState/Dropped/useDroppedAnimesStore";
+import { useDroppedMoviesStore } from "@/Stores/Stale/FilterState/Dropped/useDroppedMoviesStore";
+import { useDroppedTvshowsStore } from "@/Stores/Stale/FilterState/Dropped/useDroppedTvshowsStore";
+import { useOnholdAnimesStore } from "@/Stores/Stale/FilterState/Onhold/useOnholdAnimesStore";
+import { useOnholdMoviesStore } from "@/Stores/Stale/FilterState/Onhold/useOnholdMoviesStore";
+import { useWatchingAnimesStore } from "@/Stores/Stale/FilterState/Watching/useWatchingAnimesStore";
+import { useWatchingMoviesStore } from "@/Stores/Stale/FilterState/Watching/useWatchingMoviesStore";
+import { useWatchingTvshowsStore } from "@/Stores/Stale/FilterState/Watching/useWatchingTvshowsStore";
+import { useOnholdTvshowsStore } from "@/Stores/Stale/FilterState/Onhold/useOnholdTvshowsStore";
 
 const navItems = [
   { href: "/", label: "Home", icon: <House width={20} height={20} /> },
@@ -75,6 +91,38 @@ export default function Header() {
   if (error) {
     toast.error("Event has been created");
   }
+
+  // refetch plan to watch animes, tv shows, movies
+  const reFetchAnimeMovieTvStateData = () => {
+    //  refetch plan to watch animes, tv shows, movies
+    usePlanToWatchAnimesStore.getState().fetchPlanToWatchAnimes();
+    usePlanToWatchMoviesStore.getState().fetchPlanToWatchMovies();
+    usePlanToWatchTvshowsStore.getState().fetchPlanToWatchTvshows();
+
+    // refetch completed animes, tv shows, movies
+    useCompletedAnimesStore.getState().fetchCompletedAnimes();
+    useCompletedMoviesStore.getState().fetchCompletedMovies();
+    useCompletedTvshowsStore.getState().fetchCompletedTvshows();
+
+    useDroppedAnimesStore.getState().fetchDroppedAnimes();
+    useDroppedMoviesStore.getState().fetchDroppedMovies();
+    useDroppedTvshowsStore.getState().fetchDroppedTvshows();
+
+    useOnholdAnimesStore.getState().fetchOnholdAnimes();
+    useOnholdMoviesStore.getState().fetchOnholdMovies();
+    useOnholdTvshowsStore.getState().fetchOnholdTvshows();
+
+    useWatchingAnimesStore.getState().fetchWatchingAnimes();
+    useWatchingMoviesStore.getState().fetchWatchingMovies();
+    useWatchingTvshowsStore.getState().fetchWatchingTvshows();
+  };
+
+  useEffect(() => {
+    if (session) {
+      userLogStore.setState({ isUserLoggedIn: true });
+      reFetchAnimeMovieTvStateData();
+    } else userLogStore.setState({ isUserLoggedIn: false });
+  }, [isPending, session]);
   return (
     <>
       <header className="px-6 sm:px-0 h-full font-roboto flex flex-col container mx-auto overflow-clip">
