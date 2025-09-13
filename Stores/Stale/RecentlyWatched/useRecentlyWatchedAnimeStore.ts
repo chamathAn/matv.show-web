@@ -1,5 +1,6 @@
 import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
 import axios from "axios";
+import Bottleneck from "bottleneck";
 import { createStore } from "zustand";
 
 type RecentlyWatchedAnimesStore = {
@@ -7,6 +8,11 @@ type RecentlyWatchedAnimesStore = {
   isRecentlyWatchedAnimesFetched: boolean;
   fetchRecentlyWatchedAnimes: () => void;
 };
+// rate limit
+const limiter = new Bottleneck({
+  maxConcurrent: 1,
+  minTime: 1000,
+});
 
 export const useRecentlyWatchedAnimesStore =
   createStore<RecentlyWatchedAnimesStore>()((set) => ({
@@ -19,7 +25,9 @@ export const useRecentlyWatchedAnimesStore =
         const animeIds = [39535, 20, 5114, 30276]; // Example MAL IDs
 
         const animeRequests = animeIds.map((id) =>
-          axios.get(`https://api.jikan.moe/v4/anime/${id}/full`)
+          limiter.schedule(() =>
+            axios.get(`https://api.jikan.moe/v4/anime/${id}/full`)
+          )
         );
 
         const responses = await Promise.all(animeRequests);
