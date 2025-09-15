@@ -6,6 +6,7 @@ import useOneTvshowDetails from "@/Hooks/useOneTvshowDetails";
 import useUserAllTvShows from "@/Hooks/useUserAllTvShows";
 import { authClient } from "@/lib/auth-client";
 import { FilterStatesType } from "@/Shared/Types/filter-states.types";
+import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
 import { useUserAllTvShowsStore } from "@/Stores/Stale/UserAll/useUserAllMATStore";
 import { Rating } from "@fluentui/react-rating";
 import axios from "axios";
@@ -34,9 +35,18 @@ export default function TvContentHero() {
     )
       return;
 
+    const rawId = (OneTvshowDetails as OneTvshowDetailsType).id ?? null;
+
+    if (!rawId) {
+      // if no usable id bail out
+      return;
+    }
+
+    const oneIdStr = String(rawId);
+
     // check if the tv show is in the user's list
     const isMatched = userAllTvShows.find(
-      (tvShow) => tvShow.tvShowId === OneTvshowDetails.id.toString()
+      (tvShow) => tvShow.tvShowId === oneIdStr
     );
 
     // setting the rating and progress state

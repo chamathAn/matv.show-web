@@ -14,6 +14,7 @@ import useUserAllTvShows from "@/Hooks/useUserAllTvShows";
 import { authClient } from "@/lib/auth-client";
 import axios from "axios";
 import { useUserAllTvShowsStore } from "@/Stores/Stale/UserAll/useUserAllMATStore";
+import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
 
 export default function TvSeasonsEpisodes() {
   const { data: session } = authClient.useSession();
@@ -30,10 +31,17 @@ export default function TvSeasonsEpisodes() {
 
   useEffect(() => {
     if (!session || !userAllTvShows || !allSeasons) return;
+    const rawId = (OneTvshowDetails as OneTvshowDetailsType).id ?? null;
 
+    if (!rawId) {
+      // if no usable id bail out
+      return;
+    }
+
+    const oneIdStr = String(rawId);
     // check if the tv show is in the user's list
     const isMatched = userAllTvShows.find(
-      (tvShow) => tvShow.tvShowId === OneTvshowDetails.id.toString()
+      (tvShow) => tvShow.tvShowId === oneIdStr
     );
 
     // setting the progress state
