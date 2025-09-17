@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import Hero from "@/components/tv-shows/hero";
 import TvShowsList from "@/components/tv-shows/tv-shows-list";
 import React from "react";
