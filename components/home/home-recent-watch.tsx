@@ -10,7 +10,7 @@ import { OneTvshowDetailsType } from "@/Shared/Types/tvshows-api.types";
 import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
 import clsx from "clsx";
 import { useRecentlyWatched } from "@/Hooks/useRecentlyWatched";
-
+import FP from "@/app/assets/FallbackPreview.png";
 export default function HomeRecentWatch() {
   // ! checkout the useRecentlyWatchedAnimesStore to see how to fetch recently watched animes/ movies/tv shows's id from backend
 
@@ -110,7 +110,7 @@ export default function HomeRecentWatch() {
                 <CardContent className="px-0 h-44 sm:h-60">
                   <Image
                     className="object-cover w-full h-full rounded-md "
-                    src={getImageUrl(x)}
+                    src={getImageUrl(x) || FP}
                     alt={
                       "title" in x
                         ? x.title
@@ -122,8 +122,6 @@ export default function HomeRecentWatch() {
                     }
                     width={500}
                     height={500}
-                    blurDataURL={getImageUrl(x)}
-                    placeholder="blur"
                   />
                 </CardContent>
                 <CardFooter className="flex items-center justify-center font-medium font-poppins">

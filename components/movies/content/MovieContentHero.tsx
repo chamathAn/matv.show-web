@@ -6,6 +6,7 @@ import useOneMovieDetails from "@/Hooks/useOneMovieDetails";
 import useUserAllMovies from "@/Hooks/useUserAllMovies";
 import { authClient } from "@/lib/auth-client";
 import { FilterStatesType } from "@/Shared/Types/filter-states.types";
+import { OneMovieDetailsType } from "@/Shared/Types/movie-api.types";
 import { useUserAllMoviesStore } from "@/Stores/Stale/UserAll/useUserAllMATStore";
 import { Rating } from "@fluentui/react-rating";
 import axios from "axios";
@@ -33,11 +34,17 @@ export default function MovieContentHero() {
       !userAllMovies
     )
       return;
+    const rawId = (oneMovieDetails as OneMovieDetailsType).id ?? null;
+
+    if (!rawId) {
+      // if no usable id bail out
+      return;
+    }
+
+    const oneIdStr = String(rawId);
 
     // check if the anime is in the user's list
-    const isMatched = userAllMovies.find(
-      (movie) => movie.movieId === oneMovieDetails.id.toString()
-    );
+    const isMatched = userAllMovies.find((movie) => movie.movieId === oneIdStr);
 
     // setting the rating and progress state
     if (isMatched) {

@@ -24,6 +24,7 @@ import useCompletedData from "@/Hooks/FilterState/Completed/useCompletedData";
 import useDroppedData from "@/Hooks/FilterState/Dropped/useDroppedData";
 import useOnholdData from "@/Hooks/FilterState/Onhold/useOnholdData";
 import useWatchingData from "@/Hooks/FilterState/Watching/useWatchingData";
+import FP from "@/app/assets/FallbackPreview.png";
 export default function TvShowsList() {
   const { trendingTvshows } = useTrendingMediaData(); // trending tv shows
   const [chosenMediaType, setChosenMediaType] = useState<
@@ -132,12 +133,13 @@ export default function TvShowsList() {
               <CardContent className="px-0 h-44 sm:h-60">
                 <Image
                   className="object-cover w-full h-full rounded-md"
-                  src={`https://image.tmdb.org/t/p/original${rec.backdrop_path}`}
+                  src={
+                    `https://image.tmdb.org/t/p/original${rec.backdrop_path}` ||
+                    FP
+                  }
                   alt={rec.name || ""}
                   width={500}
                   height={500}
-                  blurDataURL={`https://image.tmdb.org/t/p/original${rec.backdrop_path}`}
-                  placeholder="blur"
                 />
               </CardContent>
               <CardFooter className="flex items-center justify-center font-medium font-poppins">

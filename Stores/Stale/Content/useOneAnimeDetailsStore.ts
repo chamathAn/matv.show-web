@@ -3,6 +3,7 @@ import {
   OneAnimeEpisodesType,
 } from "@/Shared/Types/anime-api.types";
 import axios from "axios";
+import Bottleneck from "bottleneck";
 import { createStore } from "zustand";
 
 type AnimeEpisode = OneAnimeEpisodesType["data"][0];
@@ -15,7 +16,10 @@ type OneAnimeDetails = {
   allEpisodes: AnimeEpisode[];
   fetchOneAnimeDetails: () => Promise<void>;
 };
-
+const limiter = new Bottleneck({
+  maxConcurrent: 1,
+  minTime: 1000,
+});
 export const useOneAnimeDetailsStore = createStore<OneAnimeDetails>((set) => ({
   loading: false,
   animeId: "",
@@ -34,8 +38,8 @@ export const useOneAnimeDetailsStore = createStore<OneAnimeDetails>((set) => ({
         return;
       }
 
-      const detailsRes = await axios.get(
-        `https://api.jikan.moe/v4/anime/${id}/full`
+      const detailsRes = await limiter.schedule(() =>
+        axios.get(`https://api.jikan.moe/v4/anime/${id}/full`)
       );
 
       const detailsData = detailsRes.data?.data;
@@ -43,8 +47,8 @@ export const useOneAnimeDetailsStore = createStore<OneAnimeDetails>((set) => ({
 
       useOneAnimeDetailsStore.getState().allEpisodes.length = 0;
 
-      const episodesFirstRes = await axios.get(
-        `https://api.jikan.moe/v4/anime/${id}/episodes`
+      const episodesFirstRes = await limiter.schedule(() =>
+        axios.get(`https://api.jikan.moe/v4/anime/${id}/episodes`)
       );
       const firstPage: OneAnimeEpisodesType = episodesFirstRes.data;
       if (Array.isArray(firstPage?.data)) {
@@ -54,8 +58,10 @@ export const useOneAnimeDetailsStore = createStore<OneAnimeDetails>((set) => ({
       const lastPage = firstPage?.pagination?.last_visible_page ?? 1;
 
       for (let page = 2; page <= lastPage; page++) {
-        const pageRes = await axios.get(
-          `https://api.jikan.moe/v4/anime/${id}/episodes?page=${page}`
+        const pageRes = await limiter.schedule(() =>
+          axios.get(
+            `https://api.jikan.moe/v4/anime/${id}/episodes?page=${page}`
+          )
         );
         const pageData: OneAnimeEpisodesType = pageRes.data;
         if (Array.isArray(pageData?.data)) {

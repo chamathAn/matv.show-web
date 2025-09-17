@@ -2,12 +2,19 @@ import { AnimeFullDetailsType } from "@/Shared/Types/anime-api.types";
 import axios from "axios";
 import { createStore } from "zustand";
 import { useUserAllAnimesStore } from "../../UserAll/useUserAllMATStore";
+import Bottleneck from "bottleneck";
 
 type DroppedAnimesStore = {
   droppedAnimes: AnimeFullDetailsType[];
   isDroppedAnimesFetched: boolean;
   fetchDroppedAnimes: () => void;
 };
+
+// rate limit
+const limiter = new Bottleneck({
+  maxConcurrent: 1,
+  minTime: 1000,
+});
 
 export const useDroppedAnimesStore = createStore<DroppedAnimesStore>()(
   (set) => ({
@@ -27,7 +34,9 @@ export const useDroppedAnimesStore = createStore<DroppedAnimesStore>()(
         if (animeIds.length === 0) return; // if user has no anime, return
 
         const animeRequests = animeIds.map((id) =>
-          axios.get(`https://api.jikan.moe/v4/anime/${id}/full`)
+          limiter.schedule(() =>
+            axios.get(`https://api.jikan.moe/v4/anime/${id}/full`)
+          )
         );
 
         const responses = await Promise.all(animeRequests);
