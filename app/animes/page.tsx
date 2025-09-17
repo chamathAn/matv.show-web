@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import AnimeHero from "@/components/animes/anime-hero";
 import AnimeList from "@/components/animes/anime-list";
 import React from "react";
